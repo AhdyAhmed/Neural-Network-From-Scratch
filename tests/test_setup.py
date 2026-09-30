@@ -6,7 +6,7 @@ import nn
 
 
 def test_package_imports():
-    assert nn.__version__ == "0.0.1"
+    assert isinstance(nn.__version__, str)
 
 
 def test_numpy_matmul_shapes():

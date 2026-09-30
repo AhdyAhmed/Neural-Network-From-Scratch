@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 1 of 14 (project setup). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 2 of 14 (forward pass). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -31,6 +31,7 @@ pip install -r requirements.txt
 
 pytest                           # should pass
 python examples/day1_hand_example.py
+python examples/day2_forward_pass.py
 ```
 
 ## Project structure
@@ -50,6 +51,7 @@ roadmap.md   Day-by-day plan
 - [Design document](design.md)
 - [14-day roadmap](roadmap.md)
 - [Day 1 — math refresher and hand-worked example](notes/day1_math_refresher.md)
+- [Day 2 — forward pass: Dense layer and activations](notes/day2_forward_pass.md)
 
 ## Results
 

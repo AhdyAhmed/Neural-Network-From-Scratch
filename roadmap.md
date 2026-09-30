@@ -8,8 +8,8 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 | Day | Focus | Phase | Status |
 |---|---|---|---|
-| 1 | Setup & math refresher | Setup | [ ] |
-| 2 | Dense layer (forward) & activations | Phase 1 | [ ] |
+| 1 | Setup & math refresher | Setup | [x] |
+| 2 | Dense layer (forward) & activations | Phase 1 | [x] |
 | 3 | Backpropagation & losses | Phase 1 | [ ] |
 | 4 | Sequential model, SGD & first training loop | Phase 1 | [ ] |
 | 5 | Gradient checking & unit tests | Phase 2 | [ ] |
@@ -29,12 +29,12 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Have a working repo skeleton and understand the math you'll implement.
 
-- [ ] Create the GitHub repo and clone it locally
-- [ ] Create the folder structure from `design.md` (`nn/`, `tests/`, `examples/`, `notebooks/`)
-- [ ] Set up a virtual environment and `requirements.txt` (`numpy`, `matplotlib`, `pytest`)
-- [ ] Add `.gitignore` (Python, `.venv`, `__pycache__`, data files)
-- [ ] Review: matrix multiplication, chain rule, partial derivatives
-- [ ] Work through one tiny network (2 inputs → 1 output) **by hand** on paper
+- [x] Create the GitHub repo and clone it locally
+- [x] Create the folder structure from `design.md` (`nn/`, `tests/`, `examples/`, `notebooks/`)
+- [x] Set up a virtual environment and `requirements.txt` (`numpy`, `matplotlib`, `pytest`)
+- [x] Add `.gitignore` (Python, `.venv`, `__pycache__`, data files)
+- [x] Review: matrix multiplication, chain rule, partial derivatives
+- [x] Work through one tiny network (2 inputs → 1 output) **by hand** on paper
 
 **Done when:** `pytest` runs (even with zero tests) and the first commit is pushed.
 
@@ -44,11 +44,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Data can flow forward through the network.
 
-- [ ] Implement the `Layer` base class in `layers.py`
-- [ ] Implement `Dense.forward` with weights `W` and bias `b`
-- [ ] Implement `ReLU`, `Sigmoid`, and `Tanh` (forward only)
-- [ ] Add a simple random initializer (improved on Day 9)
-- [ ] Write shape tests: input `(N, D_in)` → output `(N, D_out)`
+- [x] Implement the `Layer` base class in `layers.py`
+- [x] Implement `Dense.forward` with weights `W` and bias `b`
+- [x] Implement `ReLU`, `Sigmoid`, and `Tanh` (forward only)
+- [x] Add a simple random initializer (improved on Day 9)
+- [x] Write shape tests: input `(N, D_in)` → output `(N, D_out)`
 
 **Done when:** A two-layer forward pass on random data returns the expected shape with no errors.
 
