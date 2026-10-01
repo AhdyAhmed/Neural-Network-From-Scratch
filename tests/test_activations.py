@@ -48,9 +48,3 @@ def test_activation_output_ranges(act):
     out = act.forward(x)
     low = 0.0 if isinstance(act, Sigmoid) else -1.0
     assert np.all(out >= low) and np.all(out <= 1.0)
-
-
-@pytest.mark.parametrize("act", [ReLU(), Sigmoid(), Tanh()])
-def test_activation_backward_not_implemented_yet(act):
-    with pytest.raises(NotImplementedError):
-        act.backward(np.zeros((1, 1)))

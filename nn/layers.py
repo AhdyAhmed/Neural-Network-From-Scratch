@@ -1,6 +1,6 @@
 """Layer base class and layers (Dense, Dropout).
 
-Day 2: forward pass only. ``backward`` is implemented on Day 3.
+Day 2: forward pass. Day 3: backward pass for Dense.
 Dropout is added on Day 11.
 """
 
@@ -22,7 +22,7 @@ class Layer:
         raise NotImplementedError
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("backward() is implemented on Day 3.")
+        raise NotImplementedError
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
         """Return ``(value, gradient)`` pairs for the optimizer. No params by default."""
@@ -60,7 +60,8 @@ class Dense(Layer):
         self.W = rng.normal(loc=0.0, scale=0.01, size=(in_features, out_features))
         self.b = np.zeros((1, out_features))
 
-        # Gradients are filled in by backward() on Day 3.
+        # Gradients are filled in by backward(). They are updated in place so the
+        # (value, gradient) pairs returned by params() always stay valid.
         self.dW = np.zeros_like(self.W)
         self.db = np.zeros_like(self.b)
 
@@ -74,6 +75,28 @@ class Dense(Layer):
             )
         self._x = x
         return x @ self.W + self.b
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        """Given dL/dZ, store dL/dW and dL/db and return dL/dX.
+
+            dL/dW = X^T @ dZ        (in_features, out_features)
+            dL/db = sum_rows(dZ)    (1, out_features)
+            dL/dX = dZ @ W^T        (N, in_features)
+
+        Averaging over the batch is the loss function's job, not the layer's.
+        """
+        if self._x is None:
+            raise RuntimeError("backward() called before forward().")
+        grad_output = np.asarray(grad_output, dtype=float)
+        expected = (self._x.shape[0], self.out_features)
+        if grad_output.shape != expected:
+            raise ValueError(
+                f"Dense.backward expected grad_output of shape {expected}, "
+                f"got {grad_output.shape}."
+            )
+        self.dW[...] = self._x.T @ grad_output
+        self.db[...] = grad_output.sum(axis=0, keepdims=True)
+        return grad_output @ self.W.T
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
         return [(self.W, self.dW), (self.b, self.db)]

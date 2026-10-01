@@ -6,9 +6,11 @@ import pytest
 from nn.layers import Dense, Layer
 
 
-def test_base_layer_forward_not_implemented():
+def test_base_layer_methods_not_implemented():
     with pytest.raises(NotImplementedError):
         Layer().forward(np.zeros((1, 1)))
+    with pytest.raises(NotImplementedError):
+        Layer().backward(np.zeros((1, 1)))
 
 
 def test_dense_parameter_shapes():
@@ -77,6 +79,3 @@ def test_dense_params_pairs_match_shapes():
     assert b.shape == db.shape == (1, 3)
 
 
-def test_dense_backward_not_implemented_yet():
-    with pytest.raises(NotImplementedError):
-        Dense(2, 2, seed=0).backward(np.zeros((1, 2)))

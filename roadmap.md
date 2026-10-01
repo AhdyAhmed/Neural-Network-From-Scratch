@@ -10,7 +10,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 |---|---|---|---|
 | 1 | Setup & math refresher | Setup | [x] |
 | 2 | Dense layer (forward) & activations | Phase 1 | [x] |
-| 3 | Backpropagation & losses | Phase 1 | [ ] |
+| 3 | Backpropagation & losses | Phase 1 | [x] |
 | 4 | Sequential model, SGD & first training loop | Phase 1 | [ ] |
 | 5 | Gradient checking & unit tests | Phase 2 | [ ] |
 | 6 | XOR & regression examples | Phase 2 | [ ] |
@@ -58,11 +58,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Gradients flow backward through every component.
 
-- [ ] Implement `Dense.backward` (`dW`, `db`, `dX`)
-- [ ] Implement backward for `ReLU`, `Sigmoid`, `Tanh`
-- [ ] Implement `MSE` loss (forward + backward)
-- [ ] Implement `BinaryCrossEntropy` with probability clipping
-- [ ] Write the derivations as comments or in a short `notes/backprop.md`
+- [x] Implement `Dense.backward` (`dW`, `db`, `dX`)
+- [x] Implement backward for `ReLU`, `Sigmoid`, `Tanh`
+- [x] Implement `MSE` loss (forward + backward)
+- [x] Implement `BinaryCrossEntropy` with probability clipping
+- [x] Write the derivations as comments or in a short `notes/backprop.md`
 
 **Done when:** You can compute a loss and get non-zero gradients for every parameter on a toy batch.
 
