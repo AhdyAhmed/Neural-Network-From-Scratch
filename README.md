@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 3 of 14 (backpropagation). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 4 of 14 (training loop). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -33,7 +33,29 @@ pytest                           # should pass
 python examples/day1_hand_example.py
 python examples/day2_forward_pass.py
 python examples/day3_backprop.py
+python examples/day4_linear_regression.py
 ```
+
+## Quick example
+
+```python
+import numpy as np
+from nn.layers import Dense
+from nn.losses import MSE
+from nn.model import Sequential
+from nn.optimizers import SGD
+
+x = np.random.default_rng(0).uniform(-1, 1, size=(100, 1))
+y = 2 * x + 1
+
+model = Sequential([Dense(1, 1, seed=0)])
+model.compile(loss=MSE(), optimizer=SGD(lr=0.3))
+model.fit(x, y, epochs=200, verbose=0)
+
+print(model.layers[0].W, model.layers[0].b)   # ≈ [[2.]] [[1.]]
+```
+
+![Linear regression result](assets/day4_linear_regression.png)
 
 ## Project structure
 
@@ -54,6 +76,7 @@ roadmap.md   Day-by-day plan
 - [Day 1 — math refresher and hand-worked example](notes/day1_math_refresher.md)
 - [Day 2 — forward pass: Dense layer and activations](notes/day2_forward_pass.md)
 - [Day 3 — backpropagation derivations](notes/backprop.md)
+- [Day 4 — Sequential model, SGD, and the training loop](notes/day4_training_loop.md)
 
 ## Results
 

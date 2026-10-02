@@ -11,7 +11,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 1 | Setup & math refresher | Setup | [x] |
 | 2 | Dense layer (forward) & activations | Phase 1 | [x] |
 | 3 | Backpropagation & losses | Phase 1 | [x] |
-| 4 | Sequential model, SGD & first training loop | Phase 1 | [ ] |
+| 4 | Sequential model, SGD & first training loop | Phase 1 | [x] |
 | 5 | Gradient checking & unit tests | Phase 2 | [ ] |
 | 6 | XOR & regression examples | Phase 2 | [ ] |
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [ ] |
@@ -72,11 +72,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Train a network end-to-end for the first time.
 
-- [ ] Implement `Sequential` with `forward`, `backward`, and `compile`
-- [ ] Implement `SGD` optimizer
-- [ ] Implement `fit()` with an epoch loop and a loss history
-- [ ] Implement `predict()` and `evaluate()`
-- [ ] Train on a tiny synthetic dataset (e.g., learn `y = 2x + 1`)
+- [x] Implement `Sequential` with `forward`, `backward`, and `compile`
+- [x] Implement `SGD` optimizer
+- [x] Implement `fit()` with an epoch loop and a loss history
+- [x] Implement `predict()` and `evaluate()`
+- [x] Train on a tiny synthetic dataset (e.g., learn `y = 2x + 1`)
 
 **Done when:** Training loss decreases steadily and the model fits the linear function.
 
