@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 4 of 14 (training loop). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 5 of 14 (gradient checking). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -16,7 +16,7 @@ Frameworks hide the math. Here every gradient is derived by hand, implemented ma
 - Losses: MSE, Binary / Categorical Cross-Entropy
 - Optimizers: SGD, Momentum, RMSProp, Adam
 - Regularization: L2, Dropout
-- Numerical gradient checking + unit tests
+- Numerical gradient checking (`nn.gradcheck`) + 190 unit tests
 - Examples: XOR, sine regression, MNIST
 
 ## Getting started
@@ -34,6 +34,7 @@ python examples/day1_hand_example.py
 python examples/day2_forward_pass.py
 python examples/day3_backprop.py
 python examples/day4_linear_regression.py
+python examples/day5_gradient_check.py
 ```
 
 ## Quick example
@@ -60,7 +61,7 @@ print(model.layers[0].W, model.layers[0].b)   # ≈ [[2.]] [[1.]]
 ## Project structure
 
 ```
-nn/          Library code (layers, activations, losses, optimizers, model)
+nn/          Library code (layers, activations, losses, optimizers, model, gradcheck)
 tests/       Unit tests and gradient checks
 examples/    Runnable demos
 notes/       Math derivations and study notes
@@ -77,6 +78,7 @@ roadmap.md   Day-by-day plan
 - [Day 2 — forward pass: Dense layer and activations](notes/day2_forward_pass.md)
 - [Day 3 — backpropagation derivations](notes/backprop.md)
 - [Day 4 — Sequential model, SGD, and the training loop](notes/day4_training_loop.md)
+- [Day 5 — gradient checking and testing](notes/day5_gradient_checking.md)
 
 ## Results
 

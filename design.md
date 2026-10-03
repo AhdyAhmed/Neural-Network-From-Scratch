@@ -66,6 +66,7 @@ nn-from-scratch/
 │   ├── optimizers.py      # SGD, Momentum, RMSProp, Adam
 │   ├── initializers.py    # Xavier/Glorot, He
 │   ├── model.py           # Sequential container: fit / predict / evaluate
+│   ├── gradcheck.py       # numerical gradient checking
 │   ├── metrics.py         # accuracy, confusion matrix
 │   └── utils.py           # batching, shuffling, one-hot, data loading
 ├── tests/

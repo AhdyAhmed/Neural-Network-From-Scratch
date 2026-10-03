@@ -12,7 +12,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 2 | Dense layer (forward) & activations | Phase 1 | [x] |
 | 3 | Backpropagation & losses | Phase 1 | [x] |
 | 4 | Sequential model, SGD & first training loop | Phase 1 | [x] |
-| 5 | Gradient checking & unit tests | Phase 2 | [ ] |
+| 5 | Gradient checking & unit tests | Phase 2 | [x] |
 | 6 | XOR & regression examples | Phase 2 | [ ] |
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [ ] |
 | 8 | MNIST classification | Phase 3 | [ ] |
@@ -86,11 +86,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Prove the backprop implementation is correct.
 
-- [ ] Implement a numerical gradient checker (centered finite differences)
-- [ ] Gradient-check every layer, activation, and loss
-- [ ] Add unit tests for shapes, activation values, and loss values
-- [ ] Add a test that a tiny batch can be overfit to near-zero loss
-- [ ] Fix any bugs found (there will be some — that's the point)
+- [x] Implement a numerical gradient checker (centered finite differences)
+- [x] Gradient-check every layer, activation, and loss
+- [x] Add unit tests for shapes, activation values, and loss values
+- [x] Add a test that a tiny batch can be overfit to near-zero loss
+- [x] Fix any bugs found (there will be some — that's the point)
 
 **Done when:** All gradient checks show relative error below `1e-6` and `pytest` passes.
 

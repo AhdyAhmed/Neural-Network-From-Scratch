@@ -64,7 +64,9 @@ class Sigmoid(Layer):
         out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
         exp_x = np.exp(x[~pos])
         out[~pos] = exp_x / (1.0 + exp_x)
-        self._out = out  # backward only needs the output: s * (1 - s)
+        # Cache a private copy: the caller receives `out` and may modify it in place,
+        # which would silently corrupt the gradient. backward only needs s * (1 - s).
+        self._out = out.copy()
         return out
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
@@ -86,7 +88,8 @@ class Tanh(Layer):
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
         x = np.asarray(x, dtype=float)
         out = np.tanh(x)
-        self._out = out  # backward only needs the output: 1 - t^2
+        # Private copy for the same reason as Sigmoid. backward only needs 1 - t^2.
+        self._out = out.copy()
         return out
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:

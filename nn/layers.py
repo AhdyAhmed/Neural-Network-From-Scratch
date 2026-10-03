@@ -16,6 +16,10 @@ class Layer:
 
     * ``forward(x)``  -> compute the output and cache what backward needs.
     * ``backward(grad_output)`` -> return dL/dx and store dL/dparams (Day 3).
+
+    Caching convention: layers do not copy their *inputs* (they belong to the
+    caller), so do not modify an array in place between ``forward`` and
+    ``backward``. Layers that cache their own *output* store a private copy.
     """
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
