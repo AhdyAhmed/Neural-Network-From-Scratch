@@ -79,3 +79,20 @@ def test_dense_params_pairs_match_shapes():
     assert b.shape == db.shape == (1, 3)
 
 
+
+
+def test_dense_init_scale_controls_weight_spread():
+    small = Dense(200, 200, seed=0, init_scale=0.01)
+    large = Dense(200, 200, seed=0, init_scale=1.0)
+    assert np.isclose(small.W.std(), 0.01, rtol=0.05)
+    assert np.isclose(large.W.std(), 1.0, rtol=0.05)
+
+
+def test_dense_default_init_scale_unchanged():
+    assert np.isclose(Dense(200, 200, seed=0).W.std(), 0.01, rtol=0.05)
+
+
+@pytest.mark.parametrize("scale", [0, -1.0])
+def test_dense_rejects_non_positive_init_scale(scale):
+    with pytest.raises(ValueError):
+        Dense(2, 2, init_scale=scale)

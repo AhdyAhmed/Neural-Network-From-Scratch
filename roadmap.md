@@ -13,7 +13,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 3 | Backpropagation & losses | Phase 1 | [x] |
 | 4 | Sequential model, SGD & first training loop | Phase 1 | [x] |
 | 5 | Gradient checking & unit tests | Phase 2 | [x] |
-| 6 | XOR & regression examples | Phase 2 | [ ] |
+| 6 | XOR & regression examples | Phase 2 | [x] |
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [ ] |
 | 8 | MNIST classification | Phase 3 | [ ] |
 | 9 | Weight initialization & Momentum | Phase 4 | [ ] |
@@ -100,10 +100,10 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Show that the network learns non-linear functions.
 
-- [ ] `examples/xor.py`: solve XOR with a 2 → 4 → 1 network
-- [ ] `examples/regression.py`: fit a noisy sine curve
-- [ ] Plot the loss curves and the fitted curve
-- [ ] Save plots to an `assets/` folder for the README
+- [x] `examples/xor.py`: solve XOR with a 2 → 4 → 1 network
+- [x] `examples/regression.py`: fit a noisy sine curve
+- [x] Plot the loss curves and the fitted curve
+- [x] Save plots to an `assets/` folder for the README
 
 **Done when:** XOR reaches 100% accuracy and the sine fit visibly matches the data.
 

@@ -43,8 +43,11 @@ class Dense(Layer):
         X: (N, in_features)   W: (in_features, out_features)
         b: (1, out_features)  Z: (N, out_features)
 
-    Weights use a simple small-random initialization for now
-    (He / Xavier arrive on Day 9). Pass ``seed`` or ``rng`` for reproducibility.
+    Weights are drawn from N(0, init_scale^2) and biases start at zero.
+    This simple scheme is temporary: He / Xavier initializers arrive on Day 9.
+    The default scale (0.01) is too small for deep or hard problems, so the
+    examples pass a larger ``init_scale``. Pass ``seed`` or ``rng`` for
+    reproducibility.
     """
 
     def __init__(
@@ -53,15 +56,18 @@ class Dense(Layer):
         out_features: int,
         seed: int | None = None,
         rng: np.random.Generator | None = None,
+        init_scale: float = 0.01,
     ) -> None:
         if in_features <= 0 or out_features <= 0:
             raise ValueError("in_features and out_features must be positive integers.")
+        if init_scale <= 0:
+            raise ValueError("init_scale must be positive.")
 
         self.in_features = in_features
         self.out_features = out_features
 
         rng = rng if rng is not None else np.random.default_rng(seed)
-        self.W = rng.normal(loc=0.0, scale=0.01, size=(in_features, out_features))
+        self.W = rng.normal(loc=0.0, scale=init_scale, size=(in_features, out_features))
         self.b = np.zeros((1, out_features))
 
         # Gradients are filled in by backward(). They are updated in place so the
