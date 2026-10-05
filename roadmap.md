@@ -14,7 +14,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 4 | Sequential model, SGD & first training loop | Phase 1 | [x] |
 | 5 | Gradient checking & unit tests | Phase 2 | [x] |
 | 6 | XOR & regression examples | Phase 2 | [x] |
-| 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [ ] |
+| 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [x] |
 | 8 | MNIST classification | Phase 3 | [ ] |
 | 9 | Weight initialization & Momentum | Phase 4 | [ ] |
 | 10 | RMSProp & Adam | Phase 4 | [ ] |
@@ -113,12 +113,12 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Support multi-class classification and efficient training.
 
-- [ ] Implement a numerically stable `Softmax` (subtract the row max)
-- [ ] Implement `CategoricalCrossEntropy` and the fused softmax + CE gradient `(ŷ − y) / N`
-- [ ] Add one-hot encoding in `utils.py`
-- [ ] Implement shuffling and mini-batch iteration in `fit()`
-- [ ] Gradient-check the new components
-- [ ] Sanity check: initial loss on 10 classes ≈ 2.30
+- [x] Implement a numerically stable `Softmax` (subtract the row max)
+- [x] Implement `CategoricalCrossEntropy` and the fused softmax + CE gradient `(ŷ − y) / N`
+- [x] Add one-hot encoding in `utils.py`
+- [x] Implement shuffling and mini-batch iteration in `fit()`
+- [x] Gradient-check the new components
+- [x] Sanity check: initial loss on 10 classes ≈ 2.30
 
 **Done when:** Softmax rows sum to 1, there are no `NaN`s, and mini-batch training works on a toy 3-class dataset.
 

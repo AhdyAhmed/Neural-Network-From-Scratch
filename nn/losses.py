@@ -1,6 +1,6 @@
 """Loss functions (MSE, BinaryCrossEntropy, CategoricalCrossEntropy).
 
-Day 3: MSE and BinaryCrossEntropy.  CategoricalCrossEntropy arrives on Day 7.
+Day 3: MSE and BinaryCrossEntropy.  Day 7: CategoricalCrossEntropy.
 
 Contract (see design.md):
     forward(y_pred, y_true) -> float   (also caches what backward needs)
@@ -82,3 +82,54 @@ class BinaryCrossEntropy(Loss):
         if self._p is None:
             raise RuntimeError("backward() called before forward().")
         return (self._p - self._y) / (self._p * (1.0 - self._p)) / self._p.size
+
+
+class CategoricalCrossEntropy(Loss):
+    """Cross-entropy for multi-class classification.
+
+    Expects softmax probabilities ``y_pred`` of shape (N, K) and one-hot (or
+    soft) targets ``y_true`` of shape (N, K)  (see ``nn.utils.one_hot``).
+
+        L = -(1/N) sum_n sum_k y[n,k] log p[n,k]
+
+    Note the average is over the N *samples* (not N*K elements like MSE/BCE).
+
+    Two gradients are provided:
+
+    * ``backward()``        dL/dp = -y / (p N)   (gradient w.r.t. the probabilities)
+    * ``backward_logits()`` dL/dz = (p - y) / N  (gradient w.r.t. the logits,
+      i.e. softmax and cross-entropy fused)
+
+    The fused form is simpler and more stable: if the model is confidently
+    wrong, p for the true class underflows, so ``-y/p`` is clipped and the
+    chain through softmax returns a gradient near 0, stalling learning. The
+    fused gradient stays exactly ``p - y``.
+    """
+
+    def __init__(self, eps: float = 1e-12) -> None:
+        self.eps = eps
+        self._p: np.ndarray | None = None  # raw probabilities
+        self._y: np.ndarray | None = None
+
+    def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        try:
+            y_pred, y_true = _prepare(y_pred, y_true)
+        except ValueError as exc:
+            raise ValueError(f"{exc} For class labels, convert with nn.utils.one_hot first.") from exc
+        if y_pred.ndim != 2:
+            raise ValueError(f"CategoricalCrossEntropy expects 2D (N, classes) input, got {y_pred.shape}.")
+        self._p, self._y = y_pred, y_true
+        p = np.clip(y_pred, self.eps, 1.0)
+        return float(-np.sum(y_true * np.log(p)) / y_pred.shape[0])
+
+    def backward(self) -> np.ndarray:
+        if self._p is None:
+            raise RuntimeError("backward() called before forward().")
+        p = np.clip(self._p, self.eps, 1.0)
+        return -self._y / p / self._p.shape[0]
+
+    def backward_logits(self) -> np.ndarray:
+        """Fused softmax + cross-entropy gradient w.r.t. the logits: (p - y) / N."""
+        if self._p is None:
+            raise RuntimeError("backward_logits() called before forward().")
+        return (self._p - self._y) / self._p.shape[0]

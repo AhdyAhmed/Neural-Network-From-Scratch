@@ -1,7 +1,7 @@
 """Activation functions (ReLU, Sigmoid, Tanh, Softmax).
 
 Day 2: forward pass for ReLU, Sigmoid and Tanh.
-Day 3: backward passes. Softmax arrives on Day 7.
+Day 3: backward passes. Day 7: Softmax.
 """
 
 from __future__ import annotations
@@ -100,3 +100,42 @@ class Tanh(Layer):
 
     def __repr__(self) -> str:
         return "Tanh()"
+
+
+class Softmax(Layer):
+    """Row-wise softmax:  s_k = exp(z_k) / sum_j exp(z_j).
+
+    Numerically stable: subtracting each row's maximum before exponentiating
+    leaves the result unchanged but prevents ``exp`` from overflowing.
+
+    ``backward`` is the full Jacobian-vector product. For one row,
+    ``ds_k/dz_j = s_k (delta_kj - s_j)``, so given upstream gradient ``g``:
+
+        dz = s * (g - sum(g * s))
+
+    When Softmax is the last layer and the loss is CategoricalCrossEntropy,
+    ``Sequential.backward_from_loss`` skips this method and uses the simpler,
+    more stable fused gradient ``(s - y) / N`` instead.
+    """
+
+    def __init__(self) -> None:
+        self._out: np.ndarray | None = None
+
+    def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        x = np.asarray(x, dtype=float)
+        if x.ndim != 2:
+            raise ValueError(f"Softmax expected a 2D input (N, classes), got shape {x.shape}.")
+        shifted = x - x.max(axis=1, keepdims=True)
+        exp = np.exp(shifted)
+        out = exp / exp.sum(axis=1, keepdims=True)
+        self._out = out.copy()  # private copy, same reasoning as Sigmoid/Tanh
+        return out
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        _check_cached(self._out, "Softmax")
+        grad_output = _check_shape(grad_output, self._out.shape, "Softmax")
+        s = self._out
+        return s * (grad_output - np.sum(grad_output * s, axis=1, keepdims=True))
+
+    def __repr__(self) -> str:
+        return "Softmax()"

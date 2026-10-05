@@ -1,6 +1,7 @@
 """Sequential container with fit / predict / evaluate.
 
-Day 4: full-batch training. Mini-batching and shuffling arrive on Day 7.
+Day 4: full-batch training.  Day 7: shuffling, mini-batches, and the fused
+softmax + cross-entropy backward pass.
 """
 
 from __future__ import annotations
@@ -9,9 +10,11 @@ import time
 
 import numpy as np
 
+from nn.activations import Softmax
 from nn.layers import Layer
-from nn.losses import Loss
+from nn.losses import CategoricalCrossEntropy, Loss
 from nn.optimizers import Optimizer
+from nn.utils import iterate_minibatches
 
 
 class Sequential:
@@ -54,10 +57,32 @@ class Sequential:
             x = layer.forward(x, training=training)
         return x
 
-    def backward(self, grad: np.ndarray) -> np.ndarray:
-        for layer in reversed(self.layers):
+    def backward(self, grad: np.ndarray, skip_last: bool = False) -> np.ndarray:
+        """Chain rule through the layers in reverse.
+
+        ``skip_last=True`` starts at the second-to-last layer (used by the fused
+        softmax + cross-entropy path, where ``grad`` is already w.r.t. the logits).
+        """
+        layers = self.layers[:-1] if skip_last else self.layers
+        for layer in reversed(layers):
             grad = layer.backward(grad)
         return grad
+
+    def backward_from_loss(self) -> np.ndarray:
+        """Backpropagate starting from the loss that was just computed.
+
+        If the network ends in ``Softmax`` and the loss is
+        ``CategoricalCrossEntropy``, the two are fused: the gradient w.r.t. the
+        logits is simply ``(p - y) / N`` and the Softmax layer is skipped.
+        Otherwise this is ``backward(loss.backward())``.
+        """
+        self._require_compiled()
+        if self._is_fused():
+            return self.backward(self.loss.backward_logits(), skip_last=True)
+        return self.backward(self.loss.backward())
+
+    def _is_fused(self) -> bool:
+        return isinstance(self.layers[-1], Softmax) and isinstance(self.loss, CategoricalCrossEntropy)
 
     # ------------------------------------------------------- training
     def train_step(self, x: np.ndarray, y: np.ndarray) -> float:
@@ -65,7 +90,7 @@ class Sequential:
         self._require_compiled()
         y_pred = self.forward(x, training=True)
         loss_value = self.loss.forward(y_pred, y)
-        self.backward(self.loss.backward())
+        self.backward_from_loss()
         self.optimizer.step(self.params())
         return loss_value
 
@@ -74,19 +99,35 @@ class Sequential:
         x: np.ndarray,
         y: np.ndarray,
         epochs: int = 100,
+        batch_size: int | None = None,
+        shuffle: bool = True,
+        seed: int | None = None,
         validation_data: tuple[np.ndarray, np.ndarray] | None = None,
         verbose: int = 1,
         log_every: int | None = None,
     ) -> dict[str, list[float]]:
-        """Train on the full dataset each epoch. Returns a history dict.
+        """Train the model. Returns a history dict.
 
-        history["loss"]     training loss per epoch
+        batch_size  Samples per parameter update. ``None`` (or >= N) means
+                    full-batch gradient descent. Smaller batches give more
+                    (noisier) updates per epoch: this is the "stochastic" in SGD.
+        shuffle     Reshuffle the samples every epoch (only matters when there
+                    is more than one batch per epoch).
+        seed        Seeds the shuffling, for reproducible runs.
+
+        history["loss"]     training loss per epoch: the average of the batch
+                            losses seen during that epoch, weighted by batch size
         history["val_loss"] validation loss per epoch (only if validation_data given)
         """
         self._require_compiled()
         x, y = self._check_data(x, y)
         if epochs <= 0:
             raise ValueError("epochs must be positive.")
+        if batch_size is not None and (not isinstance(batch_size, (int, np.integer)) or batch_size <= 0):
+            raise ValueError("batch_size must be a positive integer or None.")
+        n = x.shape[0]
+        batch_size = n if batch_size is None else min(int(batch_size), n)
+        rng = np.random.default_rng(seed)
         if validation_data is not None:
             x_val, y_val = self._check_data(*validation_data)
 
@@ -97,7 +138,14 @@ class Sequential:
 
         start = time.perf_counter()
         for epoch in range(1, epochs + 1):
-            history["loss"].append(self.train_step(x, y))
+            if batch_size == n:  # full batch: no shuffling needed, one update per epoch
+                epoch_loss = self.train_step(x, y)
+            else:
+                total = 0.0
+                for xb, yb in iterate_minibatches(x, y, batch_size, shuffle=shuffle, rng=rng):
+                    total += self.train_step(xb, yb) * len(xb)
+                epoch_loss = total / n
+            history["loss"].append(epoch_loss)
             if validation_data is not None:
                 history["val_loss"].append(self.evaluate(x_val, y_val))
 

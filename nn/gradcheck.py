@@ -160,7 +160,7 @@ def check_model(
         return model.loss.forward(model.forward(x, training=True), y)
 
     objective()
-    dx = model.backward(model.loss.backward())
+    dx = model.backward_from_loss()  # includes the fused softmax + CE path when applicable
     analytic = [
         (f"layer{i} {type(layer).__name__} param{j}", value, grad.copy())
         for i, layer in enumerate(model.layers)

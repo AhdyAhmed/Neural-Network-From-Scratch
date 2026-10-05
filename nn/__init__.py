@@ -1,3 +1,3 @@
 """nn — a tiny neural network library built from scratch with NumPy."""
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"

@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 6 of 14 (XOR & regression examples). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 7 of 14 (softmax & mini-batches). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -12,11 +12,12 @@ Frameworks hide the math. Here every gradient is derived by hand, implemented ma
 ## Planned features
 
 - Fully connected layers (`Dense`) with manual backpropagation
-- Activations: ReLU, Sigmoid, Tanh, Softmax
+- Activations: ReLU, Sigmoid, Tanh, Softmax (stable, with fused cross-entropy gradient)
 - Losses: MSE, Binary / Categorical Cross-Entropy
+- Mini-batch training with shuffling (`fit(..., batch_size=32)`)
 - Optimizers: SGD, Momentum, RMSProp, Adam
 - Regularization: L2, Dropout
-- Numerical gradient checking (`nn.gradcheck`) + 216 unit tests
+- Numerical gradient checking (`nn.gradcheck`) + 313 unit tests
 - Examples: XOR, sine regression, MNIST
 
 ## Getting started
@@ -37,6 +38,7 @@ python examples/day4_linear_regression.py
 python examples/day5_gradient_check.py
 python examples/xor.py
 python examples/regression.py
+python examples/three_class_blobs.py
 ```
 
 ## Quick example
@@ -70,6 +72,10 @@ print(model.layers[0].W, model.layers[0].b)   # ≈ [[2.]] [[1.]]
 
 ![Sine regression](assets/day6_sine_regression.png)
 
+**Three-class classification** — softmax + cross-entropy with mini-batch SGD:
+
+![Three-class blobs](assets/day7_three_class.png)
+
 ## Project structure
 
 ```
@@ -92,6 +98,7 @@ roadmap.md   Day-by-day plan
 - [Day 4 — Sequential model, SGD, and the training loop](notes/day4_training_loop.md)
 - [Day 5 — gradient checking and testing](notes/day5_gradient_checking.md)
 - [Day 6 — XOR and sine regression](notes/day6_xor_and_regression.md)
+- [Day 7 — Softmax, cross-entropy, and mini-batches](notes/day7_softmax_and_minibatches.md)
 
 ## Results
 

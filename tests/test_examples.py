@@ -66,3 +66,28 @@ def test_sine_training_loss_is_stable():
     loss = np.array(history["loss"])
     assert not np.any(loss[1:] > 1.5 * loss[:-1])
     assert np.abs(np.diff(history["val_loss"][-500:])).max() < 1e-6
+
+
+# ------------------------------------------------- Day 7: three-class blobs
+from examples.three_class_blobs import NUM_CLASSES, accuracy as blob_accuracy, build_model, make_blobs, train as train_blobs
+from nn.utils import one_hot as _one_hot
+
+
+@pytest.mark.parametrize("seed", range(5))
+def test_three_class_blobs_reach_high_accuracy(seed):
+    model, history, (x_tr, l_tr, x_te, l_te) = train_blobs(seed=seed)
+    assert blob_accuracy(model, x_tr, l_tr) > 0.93
+    assert blob_accuracy(model, x_te, l_te) > 0.90
+    assert history["loss"][-1] < 0.3 * history["loss"][0]
+
+
+def test_three_class_predictions_are_probability_distributions():
+    model, _, (_, _, x_te, _) = train_blobs(seed=0)
+    p = model.predict(x_te)
+    assert np.allclose(p.sum(axis=1), 1.0) and np.all(p >= 0)
+
+
+def test_three_class_untrained_loss_is_ln_3():
+    x, labels = make_blobs()
+    loss = build_model(init_scale=0.01).evaluate(x, _one_hot(labels, NUM_CLASSES))
+    assert abs(loss - np.log(3)) < 0.01
