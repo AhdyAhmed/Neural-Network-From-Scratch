@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 7 of 14 (softmax & mini-batches). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 8 of 14 (MNIST baseline). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -17,8 +17,8 @@ Frameworks hide the math. Here every gradient is derived by hand, implemented ma
 - Mini-batch training with shuffling (`fit(..., batch_size=32)`)
 - Optimizers: SGD, Momentum, RMSProp, Adam
 - Regularization: L2, Dropout
-- Numerical gradient checking (`nn.gradcheck`) + 313 unit tests
-- Examples: XOR, sine regression, MNIST
+- Numerical gradient checking (`nn.gradcheck`) + 351 unit tests
+- Examples: XOR, sine regression, 3-class blobs, MNIST
 
 ## Getting started
 
@@ -39,6 +39,7 @@ python examples/day5_gradient_check.py
 python examples/xor.py
 python examples/regression.py
 python examples/three_class_blobs.py
+python examples/mnist.py          # downloads MNIST (~17 MB) on first run
 ```
 
 ## Quick example
@@ -99,10 +100,18 @@ roadmap.md   Day-by-day plan
 - [Day 5 — gradient checking and testing](notes/day5_gradient_checking.md)
 - [Day 6 — XOR and sine regression](notes/day6_xor_and_regression.md)
 - [Day 7 — Softmax, cross-entropy, and mini-batches](notes/day7_softmax_and_minibatches.md)
+- [Day 8 — MNIST baseline](notes/day8_mnist.md)
 
 ## Results
 
-Results will be added here once experiments are run (Day 13).
+| Experiment | Model | Training | Result |
+|---|---|---|---|
+| MNIST baseline (Day 8) | 784 → 128 → 64 → 10, ReLU, softmax | SGD lr 0.1, batch 64, 15 epochs | **97.62% test accuracy** (99.6% train, 97.6% validation) |
+
+![MNIST baseline](assets/day8_mnist_baseline.png)
+
+Raw numbers: [`results/day8_mnist_baseline.json`](results/day8_mnist_baseline.json). The test set is used once, after all
+choices were made on the validation split. Later days will improve on this baseline and add a proper comparison (Day 13).
 
 ## License
 

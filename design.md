@@ -66,6 +66,7 @@ nn-from-scratch/
 │   ├── optimizers.py      # SGD, Momentum, RMSProp, Adam
 │   ├── initializers.py    # Xavier/Glorot, He
 │   ├── model.py           # Sequential container: fit / predict / evaluate
+│   ├── datasets.py        # MNIST download, checksum, safe loading
 │   ├── gradcheck.py       # numerical gradient checking
 │   ├── metrics.py         # accuracy, confusion matrix
 │   └── utils.py           # batching, shuffling, one-hot, data loading
@@ -231,7 +232,8 @@ Pass threshold: `relative_error < 1e-6` (use `float64` for checks).
 |---|---|---|---|---|
 | XOR | 2 → 4 → 1 | SGD | — | *TBD* |
 | Sine regression | 1 → 32 → 32 → 1 | Adam | — | *TBD (MSE)* |
-| MNIST | 784 → 128 → 64 → 10 | Adam | — | *TBD (test accuracy)* |
+| MNIST (Day 8 baseline) | 784 → 128 → 64 → 10 | SGD, lr 0.1, batch 64 | 15 | 97.62% test accuracy |
+| MNIST (final) | 784 → 128 → 64 → 10 | Adam | — | *TBD (Day 13)* |
 
 Planned plots:
 - Training vs. validation loss curves
@@ -243,9 +245,9 @@ Planned plots:
 
 ## 9. Implementation Roadmap
 
-- [ ] **Phase 1 – Core:** `Dense`, `ReLU`, `Sigmoid`, `MSE`, `SGD`, `Sequential`
-- [ ] **Phase 2 – Verification:** gradient checker, unit tests, XOR example
-- [ ] **Phase 3 – Classification:** `Softmax`, cross-entropy losses, mini-batching, MNIST
+- [x] **Phase 1 – Core:** `Dense`, `ReLU`, `Sigmoid`, `MSE`, `SGD`, `Sequential`
+- [x] **Phase 2 – Verification:** gradient checker, unit tests, XOR example
+- [x] **Phase 3 – Classification:** `Softmax`, cross-entropy losses, mini-batching, MNIST
 - [ ] **Phase 4 – Better training:** Momentum, RMSProp, Adam, He/Xavier init
 - [ ] **Phase 5 – Regularization:** L2, Dropout, early stopping
 - [ ] **Phase 6 – Polish:** README with results, walkthrough notebook, CI (GitHub Actions running `pytest`)

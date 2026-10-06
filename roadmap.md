@@ -15,7 +15,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 5 | Gradient checking & unit tests | Phase 2 | [x] |
 | 6 | XOR & regression examples | Phase 2 | [x] |
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [x] |
-| 8 | MNIST classification | Phase 3 | [ ] |
+| 8 | MNIST classification | Phase 3 | [x] |
 | 9 | Weight initialization & Momentum | Phase 4 | [ ] |
 | 10 | RMSProp & Adam | Phase 4 | [ ] |
 | 11 | L2 regularization & Dropout | Phase 5 | [ ] |
@@ -128,11 +128,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Train on real data.
 
-- [ ] Write a data loader for MNIST (normalize pixels to `[0, 1]`, flatten to 784)
-- [ ] Create a train/validation/test split
-- [ ] Add `accuracy` to `metrics.py`
-- [ ] Train a 784 → 128 → 64 → 10 network with SGD
-- [ ] Record training and validation loss/accuracy per epoch
+- [x] Write a data loader for MNIST (normalize pixels to `[0, 1]`, flatten to 784)
+- [x] Create a train/validation/test split
+- [x] Add `accuracy` to `metrics.py`
+- [x] Train a 784 → 128 → 64 → 10 network with SGD
+- [x] Record training and validation loss/accuracy per epoch
 
 **Done when:** The model is clearly learning (well above 10% chance accuracy) and you have saved baseline numbers.
 

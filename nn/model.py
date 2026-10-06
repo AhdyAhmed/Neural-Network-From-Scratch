@@ -7,6 +7,7 @@ softmax + cross-entropy backward pass.
 from __future__ import annotations
 
 import time
+from typing import Callable
 
 import numpy as np
 
@@ -87,12 +88,15 @@ class Sequential:
     # ------------------------------------------------------- training
     def train_step(self, x: np.ndarray, y: np.ndarray) -> float:
         """One forward pass, one backward pass, one optimizer update. Returns the loss."""
+        return self._train_step(x, y)[0]
+
+    def _train_step(self, x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
         self._require_compiled()
         y_pred = self.forward(x, training=True)
         loss_value = self.loss.forward(y_pred, y)
         self.backward_from_loss()
         self.optimizer.step(self.params())
-        return loss_value
+        return loss_value, y_pred
 
     def fit(
         self,
@@ -103,6 +107,7 @@ class Sequential:
         shuffle: bool = True,
         seed: int | None = None,
         validation_data: tuple[np.ndarray, np.ndarray] | None = None,
+        metrics: dict[str, Callable[[np.ndarray, np.ndarray], float]] | None = None,
         verbose: int = 1,
         log_every: int | None = None,
     ) -> dict[str, list[float]]:
@@ -118,6 +123,12 @@ class Sequential:
         history["loss"]     training loss per epoch: the average of the batch
                             losses seen during that epoch, weighted by batch size
         history["val_loss"] validation loss per epoch (only if validation_data given)
+
+        metrics     Optional ``{"name": fn(y_pred, y_true) -> float}``, e.g.
+                    ``{"accuracy": nn.metrics.accuracy}``. Adds ``history[name]``
+                    (running average over the epoch's batches, computed on the
+                    predictions made *during* training, like Keras) and
+                    ``history["val_" + name]`` (computed after the epoch).
         """
         self._require_compiled()
         x, y = self._check_data(x, y)
@@ -132,27 +143,48 @@ class Sequential:
             x_val, y_val = self._check_data(*validation_data)
 
         log_every = log_every or max(1, epochs // 10)
+        metrics = metrics or {}
         history: dict[str, list[float]] = {"loss": []}
+        for name in metrics:
+            history[name] = []
         if validation_data is not None:
             history["val_loss"] = []
+            for name in metrics:
+                history["val_" + name] = []
 
         start = time.perf_counter()
         for epoch in range(1, epochs + 1):
+            totals = {name: 0.0 for name in metrics}
             if batch_size == n:  # full batch: no shuffling needed, one update per epoch
-                epoch_loss = self.train_step(x, y)
+                epoch_loss, y_pred = self._train_step(x, y)
+                for name, fn in metrics.items():
+                    totals[name] = fn(y_pred, y)
             else:
-                total = 0.0
+                loss_sum = 0.0
                 for xb, yb in iterate_minibatches(x, y, batch_size, shuffle=shuffle, rng=rng):
-                    total += self.train_step(xb, yb) * len(xb)
-                epoch_loss = total / n
+                    batch_loss, y_pred = self._train_step(xb, yb)
+                    loss_sum += batch_loss * len(xb)
+                    for name, fn in metrics.items():
+                        totals[name] += fn(y_pred, yb) * len(xb)
+                epoch_loss = loss_sum / n
+                totals = {name: total / n for name, total in totals.items()}
             history["loss"].append(epoch_loss)
+            for name in metrics:
+                history[name].append(totals[name])
             if validation_data is not None:
-                history["val_loss"].append(self.evaluate(x_val, y_val))
+                val_pred = self.predict(x_val)  # one forward pass serves the loss and every metric
+                history["val_loss"].append(self.loss.forward(val_pred, y_val))
+                for name, fn in metrics.items():
+                    history["val_" + name].append(fn(val_pred, y_val))
 
             if verbose and (epoch == 1 or epoch % log_every == 0 or epoch == epochs):
                 msg = f"epoch {epoch:>4}/{epochs}  loss: {history['loss'][-1]:.6f}"
+                for name in metrics:
+                    msg += f"  {name}: {history[name][-1]:.4f}"
                 if validation_data is not None:
                     msg += f"  val_loss: {history['val_loss'][-1]:.6f}"
+                    for name in metrics:
+                        msg += f"  val_{name}: {history['val_' + name][-1]:.4f}"
                 print(f"{msg}  ({time.perf_counter() - start:.2f}s)")
         return history
 
