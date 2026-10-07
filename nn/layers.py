@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from nn.initializers import Initializer, get_initializer, normal
+
 
 class Layer:
     """Base class for everything that can sit in a network.
@@ -43,11 +45,15 @@ class Dense(Layer):
         X: (N, in_features)   W: (in_features, out_features)
         b: (1, out_features)  Z: (N, out_features)
 
-    Weights are drawn from N(0, init_scale^2) and biases start at zero.
-    This simple scheme is temporary: He / Xavier initializers arrive on Day 9.
-    The default scale (0.01) is too small for deep or hard problems, so the
-    examples pass a larger ``init_scale``. Pass ``seed`` or ``rng`` for
-    reproducibility.
+    Initialization (biases always start at zero):
+
+    * ``initializer="he"`` / ``"xavier"`` / a callable: see ``nn.initializers``.
+      Use He before ReLU and Xavier before tanh / sigmoid / softmax.
+    * ``init_scale=s``: plain N(0, s^2) weights, the simple scheme from Days 2 to 8.
+    * neither given: N(0, 0.01^2), the original default (kept so old code behaves
+      identically; it is too small for deep networks).
+
+    Pass ``seed`` or ``rng`` for reproducibility.
     """
 
     def __init__(
@@ -56,18 +62,24 @@ class Dense(Layer):
         out_features: int,
         seed: int | None = None,
         rng: np.random.Generator | None = None,
-        init_scale: float = 0.01,
+        init_scale: float | None = None,
+        initializer: str | Initializer | None = None,
     ) -> None:
         if in_features <= 0 or out_features <= 0:
             raise ValueError("in_features and out_features must be positive integers.")
-        if init_scale <= 0:
+        if initializer is not None and init_scale is not None:
+            raise ValueError("Pass either initializer or init_scale, not both.")
+        if init_scale is not None and init_scale <= 0:
             raise ValueError("init_scale must be positive.")
 
         self.in_features = in_features
         self.out_features = out_features
 
         rng = rng if rng is not None else np.random.default_rng(seed)
-        self.W = rng.normal(loc=0.0, scale=init_scale, size=(in_features, out_features))
+        init_fn = get_initializer(initializer) if initializer is not None else normal(init_scale or 0.01)
+        self.W = np.asarray(init_fn(in_features, out_features, rng), dtype=float)
+        if self.W.shape != (in_features, out_features):
+            raise ValueError(f"initializer returned shape {self.W.shape}, expected {(in_features, out_features)}.")
         self.b = np.zeros((1, out_features))
 
         # Gradients are filled in by backward(). They are updated in place so the

@@ -67,6 +67,7 @@ nn-from-scratch/
 │   ├── initializers.py    # Xavier/Glorot, He
 │   ├── model.py           # Sequential container: fit / predict / evaluate
 │   ├── datasets.py        # MNIST download, checksum, safe loading
+│   ├── diagnostics.py     # activation / gradient statistics, vanishing-exploding warnings
 │   ├── gradcheck.py       # numerical gradient checking
 │   ├── metrics.py         # accuracy, confusion matrix
 │   └── utils.py           # batching, shuffling, one-hot, data loading

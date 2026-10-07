@@ -12,7 +12,7 @@
     "val_accuracy": 0.9762,
     "test_accuracy": 0.9762,
     "test_loss": 0.08481025340621541,
-    "train_seconds": 15.2
+    "train_seconds": 14.6
   },
   "history": {
     "loss": [

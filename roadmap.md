@@ -16,7 +16,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 6 | XOR & regression examples | Phase 2 | [x] |
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [x] |
 | 8 | MNIST classification | Phase 3 | [x] |
-| 9 | Weight initialization & Momentum | Phase 4 | [ ] |
+| 9 | Weight initialization & Momentum | Phase 4 | [x] |
 | 10 | RMSProp & Adam | Phase 4 | [ ] |
 | 11 | L2 regularization & Dropout | Phase 5 | [ ] |
 | 12 | Early stopping, metrics & visualizations | Phase 5 | [ ] |
@@ -142,11 +142,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Train faster and more stably.
 
-- [ ] Implement Xavier/Glorot and He initializers
-- [ ] Use He for ReLU layers and Xavier for tanh/sigmoid
-- [ ] Implement the `Momentum` optimizer
-- [ ] Compare random init vs. He init (plot the first few epochs of loss)
-- [ ] Log activation and gradient statistics to spot vanishing/exploding values
+- [x] Implement Xavier/Glorot and He initializers
+- [x] Use He for ReLU layers and Xavier for tanh/sigmoid
+- [x] Implement the `Momentum` optimizer
+- [x] Compare random init vs. He init (plot the first few epochs of loss)
+- [x] Log activation and gradient statistics to spot vanishing/exploding values
 
 **Done when:** He init + Momentum trains noticeably faster than the Day 8 baseline.
 

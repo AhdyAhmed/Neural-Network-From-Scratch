@@ -53,34 +53,45 @@ class Sequential:
         return "\n".join(lines)
 
     # ---------------------------------------------------------- passes
-    def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+    def forward(self, x: np.ndarray, training: bool = True, record: list | None = None) -> np.ndarray:
+        """Run the layers in order. If ``record`` is a list, every layer's output is appended to it
+        (used by ``nn.diagnostics``; the arrays are the live outputs, so copy them if you keep them)."""
         for layer in self.layers:
             x = layer.forward(x, training=training)
+            if record is not None:
+                record.append(x)
         return x
 
-    def backward(self, grad: np.ndarray, skip_last: bool = False) -> np.ndarray:
+    def backward(self, grad: np.ndarray, skip_last: bool = False, record: list | None = None) -> np.ndarray:
         """Chain rule through the layers in reverse.
 
         ``skip_last=True`` starts at the second-to-last layer (used by the fused
         softmax + cross-entropy path, where ``grad`` is already w.r.t. the logits).
+        If ``record`` is a list, the gradient w.r.t. each processed layer's input is
+        appended to it as backprop proceeds (so in reverse layer order).
         """
         layers = self.layers[:-1] if skip_last else self.layers
         for layer in reversed(layers):
             grad = layer.backward(grad)
+            if record is not None:
+                record.append(grad)
         return grad
 
-    def backward_from_loss(self) -> np.ndarray:
+    def backward_from_loss(self, record: list | None = None) -> np.ndarray:
         """Backpropagate starting from the loss that was just computed.
 
         If the network ends in ``Softmax`` and the loss is
         ``CategoricalCrossEntropy``, the two are fused: the gradient w.r.t. the
         logits is simply ``(p - y) / N`` and the Softmax layer is skipped.
         Otherwise this is ``backward(loss.backward())``.
+
+        ``record``: optional list that receives the gradient arriving at each layer's
+        *input*, in backward order (see ``backward``).
         """
         self._require_compiled()
         if self._is_fused():
-            return self.backward(self.loss.backward_logits(), skip_last=True)
-        return self.backward(self.loss.backward())
+            return self.backward(self.loss.backward_logits(), skip_last=True, record=record)
+        return self.backward(self.loss.backward(), record=record)
 
     def _is_fused(self) -> bool:
         return isinstance(self.layers[-1], Softmax) and isinstance(self.loss, CategoricalCrossEntropy)
