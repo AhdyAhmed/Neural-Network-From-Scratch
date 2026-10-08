@@ -140,3 +140,34 @@ def test_flat_activation_scale_does_not_mean_healthy_tanh_with_large_weights():
     assert max(act_std) / min(act_std) < 1.5          # looks stable...
     assert grad_rms[0] / grad_rms[-1] > 100            # ...but gradients explode toward the input
     assert any("saturated" in w for w in warnings)
+
+
+# --------------------------------------------- Day 10: optimizer comparison
+from examples.optimizer_comparison import (
+    MINIMUM as QUAD_MIN,
+    QUAD_SETTINGS,
+    TUNED,
+    make_optimizer as make_opt10,
+    quadratic_path,
+    steps_to_reach,
+)
+from nn.optimizers import Adam as _Adam, RMSProp as _RMSProp
+
+
+@pytest.mark.parametrize("name", list(QUAD_SETTINGS))
+def test_every_optimizer_reaches_the_quadratic_minimum_in_the_demo(name):
+    path = quadratic_path(QUAD_SETTINGS[name]())
+    assert np.linalg.norm(path[-1] - QUAD_MIN) < 2e-3
+    assert steps_to_reach(path, 1e-2) is not None
+
+
+def test_adaptive_methods_and_momentum_are_faster_than_sgd_in_the_demo():
+    steps = {n: steps_to_reach(quadratic_path(f()), 1e-3) for n, f in QUAD_SETTINGS.items()}
+    sgd = steps["SGD (lr 0.03)"]
+    assert all(v is not None and v < sgd for k, v in steps.items() if not k.startswith("SGD"))
+
+
+def test_tuned_optimizer_table_is_wired_correctly():
+    assert isinstance(make_opt10(TUNED["Adam"]), _Adam) and isinstance(make_opt10(TUNED["RMSProp"]), _RMSProp)
+    assert TUNED["Adam"]["lr"] == 0.001 and TUNED["RMSProp"]["lr"] == 0.001  # standard defaults won the sweep
+    assert np.isclose(TUNED["Momentum"]["lr"] / 0.1, TUNED["SGD"]["lr"])      # same effective step as SGD

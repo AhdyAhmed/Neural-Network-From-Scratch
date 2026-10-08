@@ -17,7 +17,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 7 | Softmax, cross-entropy & mini-batching | Phase 3 | [x] |
 | 8 | MNIST classification | Phase 3 | [x] |
 | 9 | Weight initialization & Momentum | Phase 4 | [x] |
-| 10 | RMSProp & Adam | Phase 4 | [ ] |
+| 10 | RMSProp & Adam | Phase 4 | [x] |
 | 11 | L2 regularization & Dropout | Phase 5 | [ ] |
 | 12 | Early stopping, metrics & visualizations | Phase 5 | [ ] |
 | 13 | Experiments & results | Phase 6 | [ ] |
@@ -156,11 +156,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Add modern adaptive optimizers.
 
-- [ ] Implement `RMSProp`
-- [ ] Implement `Adam` with bias correction
-- [ ] Test each optimizer on a simple quadratic function
-- [ ] Run SGD vs. Momentum vs. RMSProp vs. Adam on the same MNIST setup
-- [ ] Plot the optimizer comparison
+- [x] Implement `RMSProp`
+- [x] Implement `Adam` with bias correction
+- [x] Test each optimizer on a simple quadratic function
+- [x] Run SGD vs. Momentum vs. RMSProp vs. Adam on the same MNIST setup
+- [x] Plot the optimizer comparison
 
 **Done when:** All four optimizers converge on the quadratic test and the comparison plot is saved.
 

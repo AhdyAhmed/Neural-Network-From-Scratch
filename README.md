@@ -3,7 +3,7 @@
 A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 9 of 14 (initialization & momentum). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 10 of 14 (RMSProp & Adam). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -16,10 +16,10 @@ Frameworks hide the math. Here every gradient is derived by hand, implemented ma
 - Losses: MSE, Binary / Categorical Cross-Entropy
 - Mini-batch training with shuffling (`fit(..., batch_size=32)`)
 - Weight initializers: Xavier/Glorot and He (normal and uniform)
-- Optimizers: SGD, Momentum (implemented); RMSProp, Adam (Day 10)
+- Optimizers: SGD, Momentum, RMSProp, Adam (with bias correction)
 - Diagnostics: per-layer activation / gradient statistics with vanishing / exploding warnings
 - Regularization: L2, Dropout
-- Numerical gradient checking (`nn.gradcheck`) + 444 unit tests
+- Numerical gradient checking (`nn.gradcheck`) + 492 unit tests
 - Examples: XOR, sine regression, 3-class blobs, MNIST
 
 ## Getting started
@@ -43,6 +43,7 @@ python examples/regression.py
 python examples/three_class_blobs.py
 python examples/mnist.py          # downloads MNIST (~17 MB) on first run
 python examples/init_comparison.py --part 1   # signal size vs depth for different initializations
+python examples/optimizer_comparison.py --part 1   # SGD / Momentum / RMSProp / Adam on a quadratic
 ```
 
 ## Quick example
@@ -88,6 +89,14 @@ print(model.layers[0].W, model.layers[0].b)   # ≈ [[2.]] [[1.]]
 
 ![MNIST init comparison](assets/day9_mnist_init_comparison.png)
 
+**Optimizers on an ill-conditioned quadratic** — SGD races down the steep direction then crawls; RMSProp and Adam head straight for the minimum:
+
+![Quadratic paths](assets/day10_quadratic.png)
+
+**Optimizers on MNIST** — same final accuracy, different early behaviour (3 seeds):
+
+![Optimizer comparison](assets/day10_optimizer_comparison.png)
+
 ## Project structure
 
 ```
@@ -113,17 +122,19 @@ roadmap.md   Day-by-day plan
 - [Day 7 — Softmax, cross-entropy, and mini-batches](notes/day7_softmax_and_minibatches.md)
 - [Day 8 — MNIST baseline](notes/day8_mnist.md)
 - [Day 9 — initialization, momentum, and diagnostics](notes/day9_init_and_momentum.md)
+- [Day 10 — RMSProp, Adam, and the optimizer comparison](notes/day10_rmsprop_and_adam.md)
 
 ## Results
 
 | Experiment | Model | Training | Result |
 |---|---|---|---|
 | MNIST baseline (Day 8) | 784 → 128 → 64 → 10, ReLU, softmax | N(0, 0.1²) init, SGD lr 0.1, batch 64, 15 epochs | **97.62% test accuracy** (99.6% train, 97.6% validation) |
+| Optimizers (Day 10) | same network, He init, each at its best lr | SGD 0.2 · Momentum 0.02 · RMSProp 1e-3 · Adam 1e-3, 10 epochs, 3 seeds | **all end at 97.65 to 97.77% validation** (a tie); Adam reaches 97% in 3 to 4 epochs vs 4 to 6 for SGD, and is steadier than SGD |
 | He + Momentum (Day 9) | same network | He init, Momentum lr 0.01 β 0.9, 10 epochs, 3 seeds | **97.6 ± 0.1% validation**, reaches 97% in 4 to 5 epochs (Day 8 setup: 6 to 8; 96.5 ± 1.0% at epoch 10) |
 
 ![MNIST baseline](assets/day8_mnist_baseline.png)
 
-Raw numbers: [`results/day8_mnist_baseline.json`](results/day8_mnist_baseline.json), [`results/day9_init_comparison.json`](results/day9_init_comparison.json). The test set is used once, after all
+Raw numbers: [`results/day8_mnist_baseline.json`](results/day8_mnist_baseline.json), [`results/day9_init_comparison.json`](results/day9_init_comparison.json), [`results/day10_optimizer_comparison.json`](results/day10_optimizer_comparison.json). The test set is used once, after all
 choices were made on the validation split. Later days will improve on this baseline and add a proper comparison (Day 13).
 
 ## License
