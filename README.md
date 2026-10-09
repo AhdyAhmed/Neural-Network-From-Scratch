@@ -1,9 +1,9 @@
 # Neural Network From Scratch
 
-A minimal deep learning library built with **only NumPy** — no PyTorch, no TensorFlow, no autograd.
+A minimal deep learning library built with **NumPy** — no PyTorch, no TensorFlow, no autograd.
 The goal is to understand (and demonstrate) every step of how a neural network learns: the forward pass, backpropagation, and optimization.
 
-> **Status:** 🚧 In progress — Day 10 of 14 (RMSProp & Adam). See the [roadmap](roadmap.md).
+> **Status:** 🚧 In progress — Day 11 of 14 (L2 regularization & Dropout). See the [roadmap](roadmap.md).
 
 ## Why this project?
 
@@ -18,7 +18,7 @@ Frameworks hide the math. Here every gradient is derived by hand, implemented ma
 - Weight initializers: Xavier/Glorot and He (normal and uniform)
 - Optimizers: SGD, Momentum, RMSProp, Adam (with bias correction)
 - Diagnostics: per-layer activation / gradient statistics with vanishing / exploding warnings
-- Regularization: L2, Dropout
+- Regularization: L2 weight penalties and inverted Dropout
 - Numerical gradient checking (`nn.gradcheck`) + 492 unit tests
 - Examples: XOR, sine regression, 3-class blobs, MNIST
 
@@ -44,6 +44,7 @@ python examples/three_class_blobs.py
 python examples/mnist.py          # downloads MNIST (~17 MB) on first run
 python examples/init_comparison.py --part 1   # signal size vs depth for different initializations
 python examples/optimizer_comparison.py --part 1   # SGD / Momentum / RMSProp / Adam on a quadratic
+python examples/day11_regularization.py           # L2 vs Dropout on noisy sine regression
 ```
 
 ## Quick example
@@ -97,6 +98,10 @@ print(model.layers[0].W, model.layers[0].b)   # ≈ [[2.]] [[1.]]
 
 ![Optimizer comparison](assets/day10_optimizer_comparison.png)
 
+**Regularization (Day 11)** — compare the training and validation objectives with no regularization, L2 weight penalties, and inverted dropout:
+
+![Regularization comparison](assets/day11_regularization.png)
+
 ## Project structure
 
 ```
@@ -123,6 +128,7 @@ roadmap.md   Day-by-day plan
 - [Day 8 — MNIST baseline](notes/day8_mnist.md)
 - [Day 9 — initialization, momentum, and diagnostics](notes/day9_init_and_momentum.md)
 - [Day 10 — RMSProp, Adam, and the optimizer comparison](notes/day10_rmsprop_and_adam.md)
+- [Day 11 — L2 regularization and Dropout](notes/day11_regularization.md)
 
 ## Results
 

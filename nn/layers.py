@@ -125,3 +125,50 @@ class Dense(Layer):
 
     def __repr__(self) -> str:
         return f"Dense({self.in_features} -> {self.out_features})"
+
+
+class Dropout(Layer):
+    """Inverted dropout regularization. ``rate`` is the probability of dropping a unit.
+
+    During training, retained activations are scaled by ``1 / (1 - rate)`` so
+    their expected value is unchanged. During inference dropout is disabled.
+    Pass ``seed`` for a reproducible random stream, or ``rng`` to share one.
+    """
+
+    def __init__(
+        self,
+        rate: float = 0.5,
+        seed: int | None = None,
+        rng: np.random.Generator | None = None,
+    ) -> None:
+        if not 0.0 <= rate < 1.0:
+            raise ValueError("Dropout rate must be in [0, 1).")
+        if rng is not None and seed is not None:
+            raise ValueError("Pass either rng or seed, not both.")
+        self.rate = float(rate)
+        self.rng = rng if rng is not None else np.random.default_rng(seed)
+        self._mask: np.ndarray | None = None
+
+    def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        x = np.asarray(x, dtype=float)
+        if x.ndim != 2:
+            raise ValueError(f"Dropout expects 2D (N, features) input, got {x.shape}.")
+        if not training or self.rate == 0.0:
+            self._mask = np.ones_like(x)
+            return x
+        keep_prob = 1.0 - self.rate
+        self._mask = (self.rng.random(x.shape) < keep_prob).astype(float) / keep_prob
+        return x * self._mask
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        if self._mask is None:
+            raise RuntimeError("backward() called before forward().")
+        grad_output = np.asarray(grad_output, dtype=float)
+        if grad_output.shape != self._mask.shape:
+            raise ValueError(
+                f"Dropout.backward expected gradient shape {self._mask.shape}, got {grad_output.shape}."
+            )
+        return grad_output * self._mask
+
+    def __repr__(self) -> str:
+        return f"Dropout(rate={self.rate})"

@@ -12,7 +12,7 @@ from typing import Callable
 import numpy as np
 
 from nn.activations import Softmax
-from nn.layers import Layer
+from nn.layers import Dense, Layer
 from nn.losses import CategoricalCrossEntropy, Loss
 from nn.optimizers import Optimizer
 from nn.utils import iterate_minibatches
@@ -33,11 +33,31 @@ class Sequential:
         self.layers = list(layers)
         self.loss: Loss | None = None
         self.optimizer: Optimizer | None = None
+        self.l2 = 0.0
 
     # ------------------------------------------------------------ setup
-    def compile(self, loss: Loss, optimizer: Optimizer) -> None:
+    def compile(self, loss: Loss, optimizer: Optimizer, l2: float = 0.0) -> None:
+        """Configure training. ``l2`` is the non-negative L2 weight penalty.
+
+        The objective adds ``0.5 * l2 * sum(W**2)`` over Dense weights; biases
+        are not regularized. Its gradient ``l2 * W`` is added to each ``dW``.
+        The default ``l2=0`` preserves the original behavior.
+        """
+        if not np.isfinite(l2) or l2 < 0:
+            raise ValueError("l2 must be a finite non-negative number.")
         self.loss = loss
         self.optimizer = optimizer
+        self.l2 = float(l2)
+
+    def _regularization_penalty(self) -> float:
+        return 0.5 * self.l2 * sum(float(np.sum(layer.W ** 2))
+                                  for layer in self.layers if isinstance(layer, Dense))
+
+    def _add_regularization_gradients(self) -> None:
+        if self.l2:
+            for layer in self.layers:
+                if isinstance(layer, Dense):
+                    layer.dW += self.l2 * layer.W
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
         return [p for layer in self.layers for p in layer.params()]
@@ -104,8 +124,9 @@ class Sequential:
     def _train_step(self, x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
         self._require_compiled()
         y_pred = self.forward(x, training=True)
-        loss_value = self.loss.forward(y_pred, y)
+        loss_value = self.loss.forward(y_pred, y) + self._regularization_penalty()
         self.backward_from_loss()
+        self._add_regularization_gradients()
         self.optimizer.step(self.params())
         return loss_value, y_pred
 
@@ -184,7 +205,9 @@ class Sequential:
                 history[name].append(totals[name])
             if validation_data is not None:
                 val_pred = self.predict(x_val)  # one forward pass serves the loss and every metric
-                history["val_loss"].append(self.loss.forward(val_pred, y_val))
+                history["val_loss"].append(
+                    self.loss.forward(val_pred, y_val) + self._regularization_penalty()
+                )
                 for name, fn in metrics.items():
                     history["val_" + name].append(fn(val_pred, y_val))
 
@@ -208,7 +231,7 @@ class Sequential:
         """Loss on the given data, without updating anything."""
         self._require_compiled()
         x, y = self._check_data(x, y)
-        return self.loss.forward(self.predict(x), y)
+        return self.loss.forward(self.predict(x), y) + self._regularization_penalty()
 
     # --------------------------------------------------------- helpers
     def _require_compiled(self) -> None:

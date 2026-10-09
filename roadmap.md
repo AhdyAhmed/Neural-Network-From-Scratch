@@ -18,7 +18,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 8 | MNIST classification | Phase 3 | [x] |
 | 9 | Weight initialization & Momentum | Phase 4 | [x] |
 | 10 | RMSProp & Adam | Phase 4 | [x] |
-| 11 | L2 regularization & Dropout | Phase 5 | [ ] |
+| 11 | L2 regularization & Dropout | Phase 5 | [x] |
 | 12 | Early stopping, metrics & visualizations | Phase 5 | [ ] |
 | 13 | Experiments & results | Phase 6 | [ ] |
 | 14 | Documentation, CI & release | Phase 6 | [ ] |
@@ -170,13 +170,13 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Reduce overfitting.
 
-- [ ] Add L2 weight decay (in the loss and in the gradients)
-- [ ] Implement inverted `Dropout` with a `training` flag
-- [ ] Make sure `predict()` runs in evaluation mode (dropout off)
-- [ ] Gradient-check L2 (dropout tested with a fixed mask)
-- [ ] Compare train vs. validation gap with and without regularization
+- [x] Add L2 weight penalty to the objective and its gradient (Dense weights only)
+- [x] Implement inverted `Dropout` with a `training` flag
+- [x] Make sure `predict()` runs in evaluation mode (dropout off)
+- [x] Numerically verify L2 gradients and test dropout with a fixed mask
+- [x] Add a reproducible train/validation comparison example
 
-**Done when:** Regularized models show a smaller train/validation gap, and dropout is verified to be inactive during evaluation.
+**Done when:** L2 and Dropout are implemented and tested, evaluation disables dropout, and the comparison script reports actual train/validation metrics. Whether the gap shrinks is an empirical result, not a hard-coded guarantee.
 
 ---
 
