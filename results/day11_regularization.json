@@ -8,7 +8,7 @@
       "train_mse": 0.05364060460226076,
       "validation_mse": 0.04820881779937132,
       "validation_minus_train_mse": -0.0054317868028894364,
-      "seconds": 0.26,
+      "seconds": 0.248,
       "l2": 0.0,
       "dropout_rate": 0.0
     },
@@ -16,7 +16,7 @@
       "train_mse": 0.05420642109594278,
       "validation_mse": 0.048555000971409516,
       "validation_minus_train_mse": -0.005651420124533263,
-      "seconds": 0.246,
+      "seconds": 0.31,
       "l2": 0.001,
       "dropout_rate": 0.0
     },
@@ -24,7 +24,7 @@
       "train_mse": 0.0721153205963236,
       "validation_mse": 0.07515715327039293,
       "validation_minus_train_mse": 0.0030418326740693363,
-      "seconds": 0.31,
+      "seconds": 0.386,
       "l2": 0.0,
       "dropout_rate": 0.15
     }

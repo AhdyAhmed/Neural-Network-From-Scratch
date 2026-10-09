@@ -110,3 +110,11 @@ def test_trains_a_model_end_to_end():
     m.compile(loss=MSE(), optimizer=Momentum(lr=0.05, beta=0.9))
     m.fit(x, 2 * x + 1, epochs=200, verbose=0)
     assert np.isclose(m.layers[0].W[0, 0], 2.0, atol=0.01) and np.isclose(m.layers[0].b[0, 0], 1.0, atol=0.01)
+
+
+def test_changing_to_different_same_shape_parameter_is_an_error():
+    opt = Momentum(lr=0.1)
+    first = np.zeros(2)
+    opt.step([(first, np.ones(2))])
+    with pytest.raises(ValueError, match="reset"):
+        opt.step([(np.zeros(2), np.ones(2))])

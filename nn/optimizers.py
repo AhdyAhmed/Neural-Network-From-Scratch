@@ -28,12 +28,17 @@ class _Stateful(Optimizer):
 
     def __init__(self) -> None:
         self._state: list[list[np.ndarray]] | None = None  # _state[slot][param_index]
+        self._params: tuple[np.ndarray, ...] | None = None
         self.t = 0                                          # number of steps taken
 
     def _slots(self, params: list[Param], n_slots: int) -> list[list[np.ndarray]]:
+        values = tuple(value for value, _ in params)
         if self._state is None:
             self._state = [[np.zeros_like(value) for value, _ in params] for _ in range(n_slots)]
-        elif len(self._state[0]) != len(params) or any(
+            self._params = values
+        elif self._params is None or len(self._params) != len(values) or any(
+            old is not value for old, value in zip(self._params, values)
+        ) or len(self._state[0]) != len(params) or any(
             a.shape != value.shape for a, (value, _) in zip(self._state[0], params)
         ):
             raise ValueError("Optimizer was used with a different set of parameters; call reset() first.")
@@ -42,6 +47,7 @@ class _Stateful(Optimizer):
     def reset(self) -> None:
         """Forget all accumulated state (e.g. before reusing the optimizer on a new model)."""
         self._state = None
+        self._params = None
         self.t = 0
 
 

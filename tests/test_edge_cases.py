@@ -85,3 +85,36 @@ def test_bce_minimised_when_prediction_equals_label():
     at_label = BinaryCrossEntropy().forward(np.array([[0.999], [0.001]]), y)
     off = BinaryCrossEntropy().forward(np.array([[0.7], [0.3]]), y)
     assert at_label < off
+
+
+def test_model_rejects_empty_training_data():
+    from nn.activations import Tanh
+    from nn.model import Sequential
+    from nn.optimizers import SGD
+
+    model = Sequential([Dense(2, 1), Tanh()])
+    model.compile(MSE(), SGD())
+    with pytest.raises(ValueError, match="at least one sample"):
+        model.fit(np.empty((0, 2)), np.empty((0, 1)), epochs=1, verbose=0)
+
+
+def test_model_rejects_targets_with_more_than_two_dimensions():
+    from nn.model import Sequential
+    from nn.optimizers import SGD
+
+    model = Sequential([Dense(2, 1)])
+    model.compile(MSE(), SGD())
+    with pytest.raises(ValueError, match=r"y must be 2D"):
+        model.evaluate(np.ones((3, 2)), np.ones((3, 1, 1)))
+
+
+def test_model_rejects_zero_feature_or_target_columns():
+    from nn.model import Sequential
+    from nn.optimizers import SGD
+
+    model = Sequential([Dense(2, 1)])
+    model.compile(MSE(), SGD())
+    with pytest.raises(ValueError, match="at least one feature/output column"):
+        model.evaluate(np.empty((3, 0)), np.ones((3, 1)))
+    with pytest.raises(ValueError, match="at least one feature/output column"):
+        model.evaluate(np.ones((3, 2)), np.empty((3, 0)))

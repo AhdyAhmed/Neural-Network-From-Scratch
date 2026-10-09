@@ -154,12 +154,13 @@ def test_reset_restarts_the_optimizer(make):
     opt = make()
     first = np.array([1.0])
     opt.step([(first, np.array([0.5]))])
+    one_step_result = first.copy()
     for _ in range(5):
-        opt.step([(np.array([1.0]), np.array([0.5]))])
+        opt.step([(first, np.array([0.5]))])
     opt.reset()
     again = np.array([1.0])
     opt.step([(again, np.array([0.5]))])
-    assert np.isclose(again[0], first[0]) and opt.t == 1
+    assert np.isclose(again[0], one_step_result[0]) and opt.t == 1
 
 
 @pytest.mark.parametrize("make", [lambda: RMSProp(0.1), lambda: Adam(0.1)])
@@ -230,3 +231,13 @@ def test_adam_solves_xor():
         m.compile(loss=BinaryCrossEntropy(), optimizer=Adam(0.05))
         m.fit(X, Y, epochs=500, verbose=0)
         assert accuracy(m) == 1.0
+
+
+@pytest.mark.parametrize("make", [lambda: RMSProp(0.1), lambda: Adam(0.1), lambda: Momentum(0.1)])
+def test_changing_to_different_same_shape_parameter_is_an_error(make):
+    opt = make()
+    first = np.zeros(2)
+    opt.step([(first, np.ones(2))])
+    # Matching shapes are not enough: optimizer state belongs to the original arrays.
+    with pytest.raises(ValueError, match="reset"):
+        opt.step([(np.zeros(2), np.ones(2))])

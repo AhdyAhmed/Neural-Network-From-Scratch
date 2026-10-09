@@ -246,6 +246,12 @@ class Sequential:
             y = y.reshape(-1, 1)
         if x.ndim != 2:
             raise ValueError(f"x must be 2D (N, features), got shape {x.shape}.")
+        if y.ndim != 2:
+            raise ValueError(f"y must be 2D (N, outputs), got shape {y.shape}.")
+        if x.shape[0] == 0:
+            raise ValueError("x and y must contain at least one sample.")
+        if x.shape[1] == 0 or y.shape[1] == 0:
+            raise ValueError("x and y must each contain at least one feature/output column.")
         if x.shape[0] != y.shape[0]:
             raise ValueError(f"x and y must have the same number of samples, got {x.shape[0]} and {y.shape[0]}.")
         return x, y
