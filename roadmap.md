@@ -19,7 +19,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 9 | Weight initialization & Momentum | Phase 4 | [x] |
 | 10 | RMSProp & Adam | Phase 4 | [x] |
 | 11 | L2 regularization & Dropout | Phase 5 | [x] |
-| 12 | Early stopping, metrics & visualizations | Phase 5 | [ ] |
+| 12 | Early stopping, metrics & visualizations | Phase 5 | [x] |
 | 13 | Experiments & results | Phase 6 | [ ] |
 | 14 | Documentation, CI & release | Phase 6 | [ ] |
 
@@ -184,11 +184,11 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Improve the training experience and analysis tools.
 
-- [ ] Implement early stopping (patience on validation loss)
-- [ ] Add a confusion matrix and per-class accuracy
-- [ ] Plot misclassified MNIST digits
-- [ ] Plot decision boundaries for a 2D dataset (e.g., spirals)
-- [ ] Add a progress printout per epoch (loss, accuracy, time)
+- [x] Implement early stopping (patience on validation loss, min_delta, optional best-weight restoration)
+- [x] Add a confusion matrix and per-class accuracy
+- [x] Add a plot for misclassified MNIST digits (via `examples/day12_analysis.py --mnist`)
+- [x] Plot decision boundaries for a 2D three-class dataset
+- [x] Add configurable per-epoch progress output (loss, metrics, elapsed time)
 
 **Done when:** Early stopping halts training correctly and all plots are generated from scripts.
 

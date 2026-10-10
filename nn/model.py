@@ -142,6 +142,10 @@ class Sequential:
         metrics: dict[str, Callable[[np.ndarray, np.ndarray], float]] | None = None,
         verbose: int = 1,
         log_every: int | None = None,
+        early_stopping: bool = False,
+        patience: int = 5,
+        min_delta: float = 0.0,
+        restore_best_weights: bool = True,
     ) -> dict[str, list[float]]:
         """Train the model. Returns a history dict.
 
@@ -156,11 +160,12 @@ class Sequential:
                             losses seen during that epoch, weighted by batch size
         history["val_loss"] validation loss per epoch (only if validation_data given)
 
-        metrics     Optional ``{"name": fn(y_pred, y_true) -> float}``, e.g.
-                    ``{"accuracy": nn.metrics.accuracy}``. Adds ``history[name]``
-                    (running average over the epoch's batches, computed on the
-                    predictions made *during* training, like Keras) and
-                    ``history["val_" + name]`` (computed after the epoch).
+        metrics     Optional ``{"name": fn(y_pred, y_true) -> float}``; histories
+                    are recorded per epoch for training and validation.
+        early_stopping  Stop when validation loss fails to improve; requires validation_data.
+        patience    Number of consecutive non-improving epochs tolerated.
+        min_delta   Minimum decrease in validation loss considered an improvement.
+        restore_best_weights  Restore parameters from the best validation epoch.
         """
         self._require_compiled()
         x, y = self._check_data(x, y)
@@ -168,6 +173,14 @@ class Sequential:
             raise ValueError("epochs must be positive.")
         if batch_size is not None and (not isinstance(batch_size, (int, np.integer)) or batch_size <= 0):
             raise ValueError("batch_size must be a positive integer or None.")
+        if not isinstance(early_stopping, (bool, np.bool_)):
+            raise ValueError("early_stopping must be a boolean.")
+        if early_stopping and validation_data is None:
+            raise ValueError("early_stopping=True requires validation_data.")
+        if not isinstance(patience, (int, np.integer)) or patience <= 0:
+            raise ValueError("patience must be a positive integer.")
+        if not np.isfinite(min_delta) or min_delta < 0:
+            raise ValueError("min_delta must be a finite non-negative number.")
         n = x.shape[0]
         batch_size = n if batch_size is None else min(int(batch_size), n)
         rng = np.random.default_rng(seed)
@@ -185,6 +198,10 @@ class Sequential:
                 history["val_" + name] = []
 
         start = time.perf_counter()
+        best_val_loss = float("inf")
+        best_params: list[tuple[np.ndarray, np.ndarray]] | None = None
+        best_epoch = 0
+        epochs_without_improvement = 0
         for epoch in range(1, epochs + 1):
             totals = {name: 0.0 for name in metrics}
             if batch_size == n:  # full batch: no shuffling needed, one update per epoch
@@ -210,6 +227,15 @@ class Sequential:
                 )
                 for name, fn in metrics.items():
                     history["val_" + name].append(fn(val_pred, y_val))
+                if early_stopping:
+                    current_val_loss = history["val_loss"][-1]
+                    if current_val_loss < best_val_loss - min_delta:
+                        best_val_loss = current_val_loss
+                        best_epoch = epoch
+                        epochs_without_improvement = 0
+                        best_params = [(value.copy(), grad.copy()) for value, grad in self.params()]
+                    else:
+                        epochs_without_improvement += 1
 
             if verbose and (epoch == 1 or epoch % log_every == 0 or epoch == epochs):
                 msg = f"epoch {epoch:>4}/{epochs}  loss: {history['loss'][-1]:.6f}"
@@ -220,6 +246,13 @@ class Sequential:
                     for name in metrics:
                         msg += f"  val_{name}: {history['val_' + name][-1]:.4f}"
                 print(f"{msg}  ({time.perf_counter() - start:.2f}s)")
+            if early_stopping and epochs_without_improvement >= patience:
+                if verbose:
+                    print(f"Early stopping at epoch {epoch}; best validation loss {best_val_loss:.6f} at epoch {best_epoch}.")
+                break
+        if early_stopping and restore_best_weights and best_params is not None:
+            for (parameter, _), (best_value, _) in zip(self.params(), best_params):
+                parameter[...] = best_value
         return history
 
     # ------------------------------------------------------ inference

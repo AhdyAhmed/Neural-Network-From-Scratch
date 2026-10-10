@@ -58,3 +58,16 @@ The script compares no regularization, L2 (`λ=1e-3`), and Dropout (`p=0.15`) on
 2. Why aren't biases regularized here? Weight magnitude is the primary target; bias regularization is optional and often unnecessary.
 3. Why scale retained dropout activations by `1/(1-p)`? It preserves their expectation during training and lets inference use the identity function.
 4. Why must gradient checking freeze the dropout mask? Otherwise finite differences compare different random functions at `θ+ε` and `θ-ε`.
+
+## Day 12 follow-up: training controls and evaluation
+
+Day 12 adds optional early stopping to `Sequential.fit()`. Set `early_stopping=True`
+with `validation_data`, then configure `patience`, `min_delta`, and
+`restore_best_weights`. The default remains disabled, so existing calls behave as
+before. When enabled, the best model parameters are snapshotted by validation loss
+and restored at the end by default.
+
+Classification evaluation helpers are available in `nn.metrics`: `confusion_matrix`
+(rows are actual classes, columns are predicted classes) and `per_class_accuracy`
+(per-class recall; classes with no true examples are `nan`). Plotting helpers live in
+`nn.visualization` and import Matplotlib only when called.

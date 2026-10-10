@@ -146,3 +146,16 @@ choices were made on the validation split. Later days will improve on this basel
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+
+## Day 12 — Early stopping and analysis
+
+`Sequential.fit()` supports optional validation-loss early stopping with patience, a minimum improvement threshold, and best-weight restoration. `nn.metrics` provides confusion matrices and per-class accuracy; `nn.visualization` includes confusion-matrix, decision-boundary, and misclassified-MNIST plotting helpers.
+
+```bash
+python examples/day12_analysis.py
+# Optional: download/train MNIST and plot misclassified digits
+python examples/day12_analysis.py --mnist
+```
+
+The synthetic demo writes plots under `assets/` and reproducible metrics to `results/day12_analysis.json`. The MNIST option writes its own artifacts.
