@@ -234,7 +234,7 @@ Pass threshold: `relative_error < 1e-6` (use `float64` for checks).
 | XOR | 2 → 4 → 1 | SGD | — | *TBD* |
 | Sine regression | 1 → 32 → 32 → 1 | Adam | — | *TBD (MSE)* |
 | MNIST (Day 8 baseline) | 784 → 128 → 64 → 10 | SGD, lr 0.1, batch 64 | 15 | 97.62% test accuracy |
-| MNIST (final) | 784 → 128 → 64 → 10 | Adam | — | *TBD (Day 13)* |
+| MNIST (final, Day 13) | 784 → 128 → 64 → 10 (ReLU, Softmax; He hidden init; 0.10 dropout) | Adam, lr 0.001, batch 64 | 15 max, early stopping | See `results/day13_experiments.json` after running `python examples/day13_experiments.py`; do not substitute estimates. |
 
 Planned plots:
 - Training vs. validation loss curves

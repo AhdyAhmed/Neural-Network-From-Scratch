@@ -198,13 +198,14 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Produce honest, reproducible results.
 
-- [ ] Fix random seeds and record all hyperparameters
-- [ ] Run the final MNIST experiment with your best configuration
-- [ ] Fill in the results table in `design.md` (Section 8) with your **real** numbers
-- [ ] Run a small ablation: with/without Dropout, with/without He init, different learning rates
-- [ ] Write a walkthrough notebook in `notebooks/walkthrough.ipynb`
+- [x] Fix random seeds and record all hyperparameters in `examples/day13_experiments.py`
+- [x] Add a final MNIST experiment with validation-based early stopping and held-out test evaluation
+- [x] Add controlled validation-only ablations for Dropout, He/Xavier initialization, and learning rate
+- [x] Write a walkthrough notebook in `notebooks/walkthrough.ipynb`
+- [x] Document commands, configuration, and interpretation in `notes/day13_experiments_and_results.md`
+- [ ] Execute the full MNIST run and commit the measured output in `results/day13_experiments.json`
 
-**Done when:** Anyone can clone the repo, run one command, and reproduce your reported numbers.
+**Done when:** Anyone can clone the repo, run one command, and reproduce the experiment pipeline and its reported measurements. Never invent or copy measurements from a different run.
 
 ---
 
