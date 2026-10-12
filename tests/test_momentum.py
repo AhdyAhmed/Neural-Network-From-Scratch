@@ -9,9 +9,9 @@ from nn.optimizers import SGD, Momentum
 def test_first_two_steps_match_hand_calculation():
     w, g = np.array([1.0]), np.array([0.5])
     opt = Momentum(lr=0.1, beta=0.9)
-    opt.step([(w, g)])               # v = 0.5          w = 1 - 0.05  = 0.95
+    opt.step([(w, g)])  # v = 0.5          w = 1 - 0.05  = 0.95
     assert np.isclose(w[0], 0.95)
-    opt.step([(w, g)])               # v = 0.9*0.5+0.5 = 0.95   w = 0.95 - 0.095 = 0.855
+    opt.step([(w, g)])  # v = 0.9*0.5+0.5 = 0.95   w = 0.95 - 0.095 = 0.855
     assert np.isclose(w[0], 0.855)
 
 
@@ -56,6 +56,7 @@ def test_converges_on_a_quadratic():
 def test_faster_than_sgd_in_a_narrow_valley():
     """f = 0.5 (w0^2 + 100 w1^2): a long shallow direction and a steep one. SGD's stable step size
     is capped by the steep direction, which leaves it crawling along the shallow one."""
+
     def run(opt, steps=150):
         w = np.array([10.0, 1.0])
         for _ in range(steps):
@@ -109,7 +110,9 @@ def test_trains_a_model_end_to_end():
     m = Sequential([Dense(1, 1, seed=0)])
     m.compile(loss=MSE(), optimizer=Momentum(lr=0.05, beta=0.9))
     m.fit(x, 2 * x + 1, epochs=200, verbose=0)
-    assert np.isclose(m.layers[0].W[0, 0], 2.0, atol=0.01) and np.isclose(m.layers[0].b[0, 0], 1.0, atol=0.01)
+    assert np.isclose(m.layers[0].W[0, 0], 2.0, atol=0.01) and np.isclose(
+        m.layers[0].b[0, 0], 1.0, atol=0.01
+    )
 
 
 def test_changing_to_different_same_shape_parameter_is_an_error():

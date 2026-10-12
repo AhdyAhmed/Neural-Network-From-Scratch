@@ -32,7 +32,9 @@ def one_hot(labels: np.ndarray, num_classes: int | None = None) -> np.ndarray:
     if num_classes is None:
         num_classes = int(labels.max()) + 1 if labels.size else 0
     if labels.size and labels.max() >= num_classes:
-        raise ValueError(f"label {int(labels.max())} is out of range for num_classes={num_classes}.")
+        raise ValueError(
+            f"label {int(labels.max())} is out of range for num_classes={num_classes}."
+        )
 
     out = np.zeros((labels.shape[0], num_classes))
     out[np.arange(labels.shape[0]), labels] = 1.0

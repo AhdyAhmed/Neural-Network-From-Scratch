@@ -34,10 +34,14 @@ Y = np.array([[0], [1], [1], [0]], dtype=float)
 
 def train_xor(seed=0, epochs=3000, lr=0.5, init_scale=0.5, verbose=0):
     """Train the 2 -> 4 -> 1 network. Returns (model, history)."""
-    model = Sequential([
-        Dense(2, 4, seed=seed, init_scale=init_scale), Tanh(),
-        Dense(4, 1, seed=seed + 1000, init_scale=init_scale), Sigmoid(),
-    ])
+    model = Sequential(
+        [
+            Dense(2, 4, seed=seed, init_scale=init_scale),
+            Tanh(),
+            Dense(4, 1, seed=seed + 1000, init_scale=init_scale),
+            Sigmoid(),
+        ]
+    )
     model.compile(loss=BinaryCrossEntropy(), optimizer=SGD(lr=lr))
     history = model.fit(X, Y, epochs=epochs, verbose=verbose)
     return model, history
@@ -71,12 +75,16 @@ def make_plot(mlp, mlp_hist, lin, lin_hist, path):
     g = np.linspace(-0.5, 1.5, 200)
     xx, yy = np.meshgrid(g, g)
     grid = np.c_[xx.ravel(), yy.ravel()]
-    for ax, model, title in ((axes[1], lin, "Linear model (cannot solve XOR)"),
-                             (axes[2], mlp, "Hidden layer solves XOR")):
+    for ax, model, title in (
+        (axes[1], lin, "Linear model (cannot solve XOR)"),
+        (axes[2], mlp, "Hidden layer solves XOR"),
+    ):
         zz = model.predict(grid).reshape(xx.shape)
         cs = ax.contourf(xx, yy, zz, levels=20, cmap="RdBu_r", alpha=0.8, vmin=0, vmax=1)
         ax.contour(xx, yy, zz, levels=[0.5], colors="k", linewidths=2)
-        ax.scatter(X[:, 0], X[:, 1], c=Y.ravel(), cmap="RdBu_r", edgecolors="k", s=120, vmin=0, vmax=1)
+        ax.scatter(
+            X[:, 0], X[:, 1], c=Y.ravel(), cmap="RdBu_r", edgecolors="k", s=120, vmin=0, vmax=1
+        )
         ax.set(title=f"{title}\naccuracy {accuracy(model):.0%}", xlabel="x1", ylabel="x2")
     fig.colorbar(cs, ax=axes[2], label="P(output = 1)")
     fig.tight_layout()
@@ -91,10 +99,16 @@ def main():
     print("\n  x1  x2 | target | P(1)   | predicted")
     print("  -----------------------------------")
     for xi, yi, p in zip(X, Y, mlp.predict(X)):
-        print(f"  {xi[0]:.0f}   {xi[1]:.0f}  |   {yi[0]:.0f}    | {p[0]:.4f} |    {int(p[0] > 0.5)}")
+        print(
+            f"  {xi[0]:.0f}   {xi[1]:.0f}  |   {yi[0]:.0f}    | {p[0]:.4f} |    {int(p[0] > 0.5)}"
+        )
 
-    print(f"\nWith hidden layer: accuracy {accuracy(mlp):.0%}, final loss {mlp_hist['loss'][-1]:.5f}")
-    print(f"Without hidden layer: accuracy {accuracy(lin):.0%}, final loss {lin_hist['loss'][-1]:.5f}")
+    print(
+        f"\nWith hidden layer: accuracy {accuracy(mlp):.0%}, final loss {mlp_hist['loss'][-1]:.5f}"
+    )
+    print(
+        f"Without hidden layer: accuracy {accuracy(lin):.0%}, final loss {lin_hist['loss'][-1]:.5f}"
+    )
 
     try:
         out = ROOT / "assets" / "day6_xor.png"

@@ -36,13 +36,19 @@ def train_sine(seed=0, epochs=10000, lr=0.01, hidden=16, init_scale=0.5, verbose
     """Returns (model, history, (x_train, y_train, x_val, y_val))."""
     data = make_data(seed=seed)
     x_train, y_train, x_val, y_val = data
-    model = Sequential([
-        Dense(1, hidden, seed=seed + 1, init_scale=init_scale), Tanh(),
-        Dense(hidden, hidden, seed=seed + 2, init_scale=init_scale), Tanh(),
-        Dense(hidden, 1, seed=seed + 3, init_scale=init_scale),
-    ])
+    model = Sequential(
+        [
+            Dense(1, hidden, seed=seed + 1, init_scale=init_scale),
+            Tanh(),
+            Dense(hidden, hidden, seed=seed + 2, init_scale=init_scale),
+            Tanh(),
+            Dense(hidden, 1, seed=seed + 3, init_scale=init_scale),
+        ]
+    )
     model.compile(loss=MSE(), optimizer=SGD(lr=lr))
-    history = model.fit(x_train, y_train, epochs=epochs, validation_data=(x_val, y_val), verbose=verbose)
+    history = model.fit(
+        x_train, y_train, epochs=epochs, validation_data=(x_val, y_val), verbose=verbose
+    )
     return model, history, data
 
 

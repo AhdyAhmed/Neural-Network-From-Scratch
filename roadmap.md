@@ -20,7 +20,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 | 10 | RMSProp & Adam | Phase 4 | [x] |
 | 11 | L2 regularization & Dropout | Phase 5 | [x] |
 | 12 | Early stopping, metrics & visualizations | Phase 5 | [x] |
-| 13 | Experiments & results | Phase 6 | [ ] |
+| 13 | Experiments & results | Phase 6 | [x] |
 | 14 | Documentation, CI & release | Phase 6 | [ ] |
 
 ---
@@ -203,7 +203,7 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 - [x] Add controlled validation-only ablations for Dropout, He/Xavier initialization, and learning rate
 - [x] Write a walkthrough notebook in `notebooks/walkthrough.ipynb`
 - [x] Document commands, configuration, and interpretation in `notes/day13_experiments_and_results.md`
-- [ ] Execute the full MNIST run and commit the measured output in `results/day13_experiments.json`
+- [x] Execute the full MNIST run and commit the measured output in `results/day13_experiments.json`
 
 **Done when:** Anyone can clone the repo, run one command, and reproduce the experiment pipeline and its reported measurements. Never invent or copy measurements from a different run.
 
@@ -213,12 +213,16 @@ A 14-day plan to build the library described in [`design.md`](design.md). Each d
 
 **Goal:** Make the repo look and feel professional.
 
-- [ ] Write `README.md`: overview, install steps, quick example, results, plots
-- [ ] Add docstrings and type hints to the public API
-- [ ] Add a GitHub Actions workflow that runs `pytest` on every push
-- [ ] Add a CI badge and an MIT `LICENSE`
-- [ ] Clean up code (consistent style, remove dead code, run a formatter like `black`)
+- [x] Write `README.md`: overview, install steps, quick example, results, plots
+- [x] Add docstrings and type hints to the public API
+- [x] Add a GitHub Actions workflow that runs `pytest` on every push
+- [x] Add a CI badge and an MIT `LICENSE`
+- [x] Clean up code (consistent style, remove dead code, run a formatter like `black`)
 - [ ] Tag a release (`v0.1.0`) and add repo topics: `neural-network`, `numpy`, `deep-learning`, `machine-learning`, `from-scratch`
+
+The code and metadata are prepared as version `0.1.0`. Creating the Git tag,
+publishing the GitHub release, and setting repository topics remain remote
+repository actions and should be done after CI passes on the pushed commit.
 
 **Done when:** The CI badge is green and the README explains the project clearly to a stranger in under two minutes.
 

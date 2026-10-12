@@ -16,10 +16,14 @@ import numpy as np
 
 
 class Loss:
+    """Base interface for scalar losses with a cached backward pass."""
+
     def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        """Compute and cache the scalar loss for a prediction batch."""
         raise NotImplementedError
 
     def backward(self) -> np.ndarray:
+        """Return the gradient with respect to the cached predictions."""
         raise NotImplementedError
 
     def __call__(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
@@ -47,11 +51,13 @@ class MSE(Loss):
         self._y_true: np.ndarray | None = None
 
     def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        """Return mean squared error and cache the validated arrays."""
         y_pred, y_true = _prepare(y_pred, y_true)
         self._y_pred, self._y_true = y_pred, y_true
         return float(np.mean((y_pred - y_true) ** 2))
 
     def backward(self) -> np.ndarray:
+        """Return the MSE gradient with respect to predictions."""
         if self._y_pred is None:
             raise RuntimeError("backward() called before forward().")
         return 2.0 * (self._y_pred - self._y_true) / self._y_pred.size
@@ -73,12 +79,14 @@ class BinaryCrossEntropy(Loss):
         self._y: np.ndarray | None = None
 
     def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        """Return numerically stable binary cross-entropy."""
         y_pred, y_true = _prepare(y_pred, y_true)
         p = np.clip(y_pred, self.eps, 1.0 - self.eps)
         self._p, self._y = p, y_true
         return float(-np.mean(y_true * np.log(p) + (1.0 - y_true) * np.log(1.0 - p)))
 
     def backward(self) -> np.ndarray:
+        """Return the binary cross-entropy gradient with respect to probabilities."""
         if self._p is None:
             raise RuntimeError("backward() called before forward().")
         return (self._p - self._y) / (self._p * (1.0 - self._p)) / self._p.size
@@ -112,17 +120,23 @@ class CategoricalCrossEntropy(Loss):
         self._y: np.ndarray | None = None
 
     def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
+        """Return mean categorical cross-entropy for a probability matrix."""
         try:
             y_pred, y_true = _prepare(y_pred, y_true)
         except ValueError as exc:
-            raise ValueError(f"{exc} For class labels, convert with nn.utils.one_hot first.") from exc
+            raise ValueError(
+                f"{exc} For class labels, convert with nn.utils.one_hot first."
+            ) from exc
         if y_pred.ndim != 2:
-            raise ValueError(f"CategoricalCrossEntropy expects 2D (N, classes) input, got {y_pred.shape}.")
+            raise ValueError(
+                f"CategoricalCrossEntropy expects 2D (N, classes) input, got {y_pred.shape}."
+            )
         self._p, self._y = y_pred, y_true
         p = np.clip(y_pred, self.eps, 1.0)
         return float(-np.sum(y_true * np.log(p)) / y_pred.shape[0])
 
     def backward(self) -> np.ndarray:
+        """Return the gradient with respect to softmax probabilities."""
         if self._p is None:
             raise RuntimeError("backward() called before forward().")
         p = np.clip(self._p, self.eps, 1.0)

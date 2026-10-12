@@ -43,5 +43,7 @@ def test_shape_mismatch_raises():
 
 
 def test_returns_python_float_between_0_and_1():
-    value = accuracy(np.random.default_rng(0).random((20, 4)), np.random.default_rng(1).integers(0, 4, 20))
+    value = accuracy(
+        np.random.default_rng(0).random((20, 4)), np.random.default_rng(1).integers(0, 4, 20)
+    )
     assert isinstance(value, float) and 0.0 <= value <= 1.0

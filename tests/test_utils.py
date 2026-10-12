@@ -55,7 +55,9 @@ def data(n=10):
 
 def test_batches_cover_every_sample_exactly_once():
     x, y = data(10)
-    seen = np.concatenate([yb.ravel() for _, yb in iterate_minibatches(x, y, 3, rng=np.random.default_rng(0))])
+    seen = np.concatenate(
+        [yb.ravel() for _, yb in iterate_minibatches(x, y, 3, rng=np.random.default_rng(0))]
+    )
     assert sorted(seen) == list(range(10))
 
 
@@ -84,7 +86,9 @@ def test_x_and_y_stay_aligned_after_shuffling():
 
 def test_shuffle_is_reproducible_with_a_seed_and_actually_shuffles():
     x, y = data(30)
-    run = lambda s: np.concatenate([yb.ravel() for _, yb in iterate_minibatches(x, y, 7, rng=np.random.default_rng(s))])
+    run = lambda s: np.concatenate(
+        [yb.ravel() for _, yb in iterate_minibatches(x, y, 7, rng=np.random.default_rng(s))]
+    )
     assert np.array_equal(run(0), run(0))
     assert not np.array_equal(run(0), run(1))
     assert not np.array_equal(run(0), np.arange(30))

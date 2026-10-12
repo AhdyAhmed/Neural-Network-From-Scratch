@@ -41,6 +41,33 @@ The output layer uses Xavier initialization. The final model's held-out test met
 
 The script compares a baseline without dropout, adding 0.10 dropout, switching hidden-layer initialization from He to Xavier, and reducing Adam's learning rate from 0.001 to 0.0003. These are small controlled experiments, not a broad hyperparameter search. Each run records its full configuration and deterministic seeds.
 
+## Measured full run
+
+The committed full run used the canonical 50,000 training, 10,000 validation,
+and 10,000 held-out test examples. The final model early-stopped after 9 epochs
+and restored the weights from epoch 6, where validation loss was lowest.
+
+| Measurement | Result |
+|---|---:|
+| Best validation loss | 0.07931 |
+| Final recorded validation accuracy | 97.87% |
+| Held-out test accuracy after restoring best weights | **97.81%** |
+| Held-out test loss | 0.07313 |
+| Final-model training time on this machine | 71.106 seconds |
+
+Validation-only ablations produced the following final recorded accuracies:
+
+| Variant | Validation accuracy | Best validation loss |
+|---|---:|---:|
+| He, no Dropout | 97.58% | 0.08875 |
+| He, Dropout 0.10 | 97.62% | **0.07931** |
+| Xavier, no Dropout | **97.66%** | 0.08264 |
+| He, no Dropout, learning rate 0.0003 | 97.47% | 0.08655 |
+
+The differences are from one seeded run and are not evidence that one variant
+is universally superior. The measured histories, exact configurations,
+confusion matrix, and timings are in `results/day13_experiments.json`.
+
 ## Interpreting results honestly
 
 Use the numbers written by your own run in `results/day13_experiments.json`; don't copy numbers from another machine as if they were yours. Training time depends on CPU, NumPy/BLAS, and machine load. A small validation difference on one seed is not proof that a setting is universally better. For stronger conclusions, repeat promising configurations across multiple seeds and report mean and standard deviation.

@@ -49,9 +49,12 @@ def test_backward_record_collects_input_gradients_in_reverse_order():
     m.loss.forward(m.forward(x), y)
     rec = []
     m.backward_from_loss(record=rec)
-    assert len(rec) == len(m.layers) - 1            # fused path skips the Softmax layer
-    assert rec[-1].shape == x.shape                 # last recorded = gradient w.r.t. the data
-    assert rec[0].shape == (len(x), 64)             # first recorded = gradient entering the last Dense layer's input
+    assert len(rec) == len(m.layers) - 1  # fused path skips the Softmax layer
+    assert rec[-1].shape == x.shape  # last recorded = gradient w.r.t. the data
+    assert rec[0].shape == (
+        len(x),
+        64,
+    )  # first recorded = gradient entering the last Dense layer's input
 
 
 def test_recording_does_not_change_the_computation():
@@ -115,7 +118,11 @@ def test_requires_a_compiled_model():
 def test_format_statistics_is_a_table_with_one_row_per_layer():
     m = deep(depth=2, initializer="he")
     text = format_statistics(stats_for(m))
-    assert len(text.splitlines()) == 2 + len(m.layers) and "Dense(64 -> 64)" in text and "ReLU()" in text
+    assert (
+        len(text.splitlines()) == 2 + len(m.layers)
+        and "Dense(64 -> 64)" in text
+        and "ReLU()" in text
+    )
 
 
 def test_update_ratio_is_none_without_weights():

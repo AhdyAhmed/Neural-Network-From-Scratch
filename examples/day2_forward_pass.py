@@ -19,9 +19,12 @@ def main():
     x = rng.normal(size=(5, 3))  # 5 samples, 3 features
 
     network = [
-        Dense(3, 4, seed=1), ReLU(),
-        Dense(4, 2, seed=2), ReLU(),
-        Dense(2, 1, seed=3), Sigmoid(),
+        Dense(3, 4, seed=1),
+        ReLU(),
+        Dense(4, 2, seed=2),
+        ReLU(),
+        Dense(2, 1, seed=3),
+        Sigmoid(),
     ]
 
     print(f"input:  {x.shape}")

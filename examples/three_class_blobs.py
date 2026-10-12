@@ -36,10 +36,14 @@ def make_blobs(n_per_class=100, spread=0.8, seed=0):
 
 
 def build_model(seed=0, lr=0.1, hidden=16, init_scale=0.5):
-    model = Sequential([
-        Dense(2, hidden, seed=seed, init_scale=init_scale), Tanh(),
-        Dense(hidden, NUM_CLASSES, seed=seed + 1, init_scale=init_scale), Softmax(),
-    ])
+    model = Sequential(
+        [
+            Dense(2, hidden, seed=seed, init_scale=init_scale),
+            Tanh(),
+            Dense(hidden, NUM_CLASSES, seed=seed + 1, init_scale=init_scale),
+            Softmax(),
+        ]
+    )
     model.compile(loss=CategoricalCrossEntropy(), optimizer=SGD(lr=lr))
     return model
 
@@ -55,8 +59,15 @@ def train(seed=0, epochs=60, batch_size=32, lr=0.1, verbose=0):
     y_tr, y_te = one_hot(l_tr, NUM_CLASSES), one_hot(l_te, NUM_CLASSES)
 
     model = build_model(seed=seed, lr=lr)
-    history = model.fit(x_tr, y_tr, epochs=epochs, batch_size=batch_size, seed=seed,
-                        validation_data=(x_te, y_te), verbose=verbose)
+    history = model.fit(
+        x_tr,
+        y_tr,
+        epochs=epochs,
+        batch_size=batch_size,
+        seed=seed,
+        validation_data=(x_te, y_te),
+        verbose=verbose,
+    )
     return model, history, (x_tr, l_tr, x_te, l_te)
 
 
@@ -71,19 +82,35 @@ def make_plot(model, history, data, path):
 
     ax1.plot(history["loss"], label="train")
     ax1.plot(history["val_loss"], label="test")
-    ax1.axhline(np.log(NUM_CLASSES), color="gray", ls="--", label=f"chance (ln {NUM_CLASSES} = {np.log(NUM_CLASSES):.2f})")
-    ax1.set(title="Cross-entropy loss (mini-batch SGD)", xlabel="epoch", ylabel="loss", yscale="log")
+    ax1.axhline(
+        np.log(NUM_CLASSES),
+        color="gray",
+        ls="--",
+        label=f"chance (ln {NUM_CLASSES} = {np.log(NUM_CLASSES):.2f})",
+    )
+    ax1.set(
+        title="Cross-entropy loss (mini-batch SGD)", xlabel="epoch", ylabel="loss", yscale="log"
+    )
     ax1.legend()
 
     g = np.linspace(-5, 5, 300)
     xx, yy = np.meshgrid(g, g)
     region = model.predict(np.c_[xx.ravel(), yy.ravel()]).argmax(axis=1).reshape(xx.shape)
-    ax2.contourf(xx, yy, region, levels=[-0.5, 0.5, 1.5, 2.5], colors=["#cfe2f3", "#f4cccc", "#d9ead3"])
+    ax2.contourf(
+        xx, yy, region, levels=[-0.5, 0.5, 1.5, 2.5], colors=["#cfe2f3", "#f4cccc", "#d9ead3"]
+    )
     colors = np.array(["C0", "C3", "C2"])
     ax2.scatter(x_tr[:, 0], x_tr[:, 1], c=colors[l_tr], s=14, alpha=0.7, label="train")
-    ax2.scatter(x_te[:, 0], x_te[:, 1], c=colors[l_te], s=40, marker="s", edgecolors="k", label="test")
-    ax2.set(title=f"Decision regions (test accuracy {accuracy(model, x_te, l_te):.0%})",
-            xlabel="x1", ylabel="x2", xlim=(-5, 5), ylim=(-5, 5))
+    ax2.scatter(
+        x_te[:, 0], x_te[:, 1], c=colors[l_te], s=40, marker="s", edgecolors="k", label="test"
+    )
+    ax2.set(
+        title=f"Decision regions (test accuracy {accuracy(model, x_te, l_te):.0%})",
+        xlabel="x1",
+        ylabel="x2",
+        xlim=(-5, 5),
+        ylim=(-5, 5),
+    )
     ax2.legend(loc="upper right")
 
     fig.tight_layout()
@@ -97,8 +124,12 @@ def main():
     x, labels = make_blobs()
     y = one_hot(labels, NUM_CLASSES)
     untrained = build_model(init_scale=0.01)
-    print(f"Initial loss, tiny weights:   {untrained.evaluate(x, y):.3f}   (ln 3 = {np.log(3):.3f})")
-    print(f"Initial loss, std-0.5 weights: {build_model().evaluate(x, y):.3f}   (confidently wrong -> higher)")
+    print(
+        f"Initial loss, tiny weights:   {untrained.evaluate(x, y):.3f}   (ln 3 = {np.log(3):.3f})"
+    )
+    print(
+        f"Initial loss, std-0.5 weights: {build_model().evaluate(x, y):.3f}   (confidently wrong -> higher)"
+    )
     print(untrained.summary(), "\n")
 
     model, history, data = train(verbose=1)

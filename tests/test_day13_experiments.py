@@ -1,4 +1,5 @@
 """Tests for the Day 13 experiment configuration and reproducibility."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -7,7 +8,9 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("day13_experiments", ROOT / "examples" / "day13_experiments.py")
+SPEC = importlib.util.spec_from_file_location(
+    "day13_experiments", ROOT / "examples" / "day13_experiments.py"
+)
 assert SPEC is not None and SPEC.loader is not None
 module = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(module)
@@ -37,7 +40,10 @@ def test_ablation_configs_cover_requested_dimensions():
     configs = module.make_ablation_configs(epochs=3)
     by_name = {config["name"]: config for config in configs}
     assert set(by_name) == {
-        "baseline_no_dropout", "dropout_0.10", "xavier_no_dropout", "learning_rate_0.0003"
+        "baseline_no_dropout",
+        "dropout_0.10",
+        "xavier_no_dropout",
+        "learning_rate_0.0003",
     }
     assert by_name["baseline_no_dropout"]["initializer"] == "he"
     assert by_name["dropout_0.10"]["dropout_rate"] == 0.10

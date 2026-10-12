@@ -48,7 +48,11 @@ def test_no_duplicate_images_across_train_and_test(mnist):
 def test_one_short_epoch_is_far_above_chance(mnist):
     from examples.mnist import CONFIG, train
 
-    small = ((mnist[0][0][:10000], mnist[0][1][:10000]), (mnist[1][0][:2000], mnist[1][1][:2000]), mnist[2])
+    small = (
+        (mnist[0][0][:10000], mnist[0][1][:10000]),
+        (mnist[1][0][:2000], mnist[1][1][:2000]),
+        mnist[2],
+    )
     _, history = train(small, {**CONFIG, "epochs": 2}, verbose=0)
     assert history["val_accuracy"][-1] > 0.7  # chance is 10%; two short epochs on 10k samples
 

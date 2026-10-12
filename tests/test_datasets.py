@@ -16,11 +16,14 @@ from nn.datasets import MNIST_FILENAME, load_mnist, parse_mnist_pickle, sha256_o
 def fake_mnist(n=(20, 6, 6), seed=0):
     rng = np.random.default_rng(seed)
     return tuple(
-        (rng.random((k, 784)).astype(np.float32), rng.integers(0, 10, size=k).astype(np.int64)) for k in n
+        (rng.random((k, 784)).astype(np.float32), rng.integers(0, 10, size=k).astype(np.int64))
+        for k in n
     )
 
 
-def write(path, obj, protocol=4):  # protocol 4 stores arrays without _codecs.encode (not allowed by the loader)
+def write(
+    path, obj, protocol=4
+):  # protocol 4 stores arrays without _codecs.encode (not allowed by the loader)
     with gzip.open(path, "wb") as f:
         pickle.dump(obj, f, protocol=protocol)
 
@@ -113,7 +116,9 @@ def test_download_success_path(tmp_path, monkeypatch):
     source = tmp_path / "source.pkl.gz"
     write(source, fake_mnist())
     monkeypatch.setattr(datasets, "MNIST_SHA256", sha256_of(source))
-    monkeypatch.setattr(urllib.request, "urlopen", lambda url, timeout=0: io.BytesIO(source.read_bytes()))
+    monkeypatch.setattr(
+        urllib.request, "urlopen", lambda url, timeout=0: io.BytesIO(source.read_bytes())
+    )
     dest_dir = tmp_path / "cache"
     train, _, _ = load_mnist(data_dir=dest_dir)
     assert (dest_dir / MNIST_FILENAME).exists() and train[0].shape == (20, 784)

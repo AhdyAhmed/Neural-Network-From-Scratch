@@ -1,4 +1,5 @@
 """Day 11: L2 regularization and inverted dropout."""
+
 import numpy as np
 import pytest
 
@@ -70,7 +71,9 @@ def test_dropout_fixed_mask_gradient_matches_finite_difference():
 
 
 def test_l2_objective_and_weight_gradient_match_finite_difference():
-    model = Sequential([Dense(2, 3, seed=0, init_scale=0.3), ReLU(), Dense(3, 1, seed=1, init_scale=0.3)])
+    model = Sequential(
+        [Dense(2, 3, seed=0, init_scale=0.3), ReLU(), Dense(3, 1, seed=1, init_scale=0.3)]
+    )
     model.compile(MSE(), SGD(lr=0.01), l2=0.2)
     x = np.array([[0.2, -0.4], [0.8, 0.1], [-0.5, 0.7]])
     y = np.array([[0.3], [-0.2], [0.5]])
@@ -87,9 +90,15 @@ def test_l2_objective_and_weight_gradient_match_finite_difference():
         for idx in np.ndindex(layer.W.shape):
             old = layer.W[idx]
             layer.W[idx] = old + eps
-            plus = model.loss.forward(model.forward(x, training=False), y) + model._regularization_penalty()
+            plus = (
+                model.loss.forward(model.forward(x, training=False), y)
+                + model._regularization_penalty()
+            )
             layer.W[idx] = old - eps
-            minus = model.loss.forward(model.forward(x, training=False), y) + model._regularization_penalty()
+            minus = (
+                model.loss.forward(model.forward(x, training=False), y)
+                + model._regularization_penalty()
+            )
             layer.W[idx] = old
             numeric[idx] = (plus - minus) / (2 * eps)
         assert np.allclose(grad, numeric, atol=1e-6, rtol=1e-5)

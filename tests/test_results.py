@@ -51,7 +51,7 @@ def test_day10_comparison_structure():
 def test_day10_claims_hold_in_the_saved_numbers():
     s = load("day10_optimizer_comparison.json")["summary"]
     finals = {k: v["val_acc_mean"][-1] for k, v in s.items()}
-    assert max(finals.values()) - min(finals.values()) < 0.005       # all four end within half a point
+    assert max(finals.values()) - min(finals.values()) < 0.005  # all four end within half a point
     assert all(f > 0.975 for f in finals.values())
     # Adam is the quickest and steadiest early on; plain SGD at its tuned lr wobbles
     assert s["Adam"]["val_acc_mean"][2] > 0.97 and s["SGD"]["val_acc_mean"][2] < 0.95
@@ -59,3 +59,25 @@ def test_day10_claims_hold_in_the_saved_numbers():
     assert max(s["Adam"]["epochs_to_97pct"]) <= 4 and max(s["SGD"]["epochs_to_97pct"]) >= 5
     # per-step cost: the adaptive methods are slower than plain SGD
     assert s["Adam"]["seconds_per_epoch"] > s["SGD"]["seconds_per_epoch"]
+
+
+def test_day13_full_experiment_structure():
+    r = load("day13_experiments.json")
+    assert r["quick_mode"] is False
+    assert r["split_sizes"] == {"train": 50000, "validation": 10000, "test": 10000}
+    assert r["seed"] == 2026
+    assert len(r["ablations"]) == 4
+
+    final = r["final_experiment"]
+    assert final["config"]["architecture"] == [784, 128, 64, 10]
+    assert final["epochs_completed"] == len(final["history"]["loss"])
+    assert len(final["test_confusion_matrix"]) == 10
+    assert sum(map(sum, final["test_confusion_matrix"])) == 10000
+
+
+def test_day13_readme_claims_hold_in_saved_numbers():
+    final = load("day13_experiments.json")["final_experiment"]
+    assert np.isclose(final["test_accuracy"], 0.9781)
+    assert np.isclose(final["test_loss"], 0.07312728315115276)
+    assert np.isclose(final["best_validation_loss"], min(final["history"]["val_loss"]), atol=1e-7)
+    assert final["test_accuracy"] > 0.97

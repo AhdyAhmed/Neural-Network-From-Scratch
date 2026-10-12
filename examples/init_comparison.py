@@ -97,16 +97,31 @@ def plot_signal(results, path):
     import matplotlib.pyplot as plt
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 4.5))
-    styles = {"ReLU, N(0, 0.01²)": ("C3", "-"), "ReLU, N(0, 1²)": ("C1", "-"), "ReLU, Xavier": ("C4", "--"),
-              "ReLU, He": ("C2", "-"), "tanh, N(0, 1²)": ("C1", ":"), "tanh, Xavier": ("C0", ":")}
+    styles = {
+        "ReLU, N(0, 0.01²)": ("C3", "-"),
+        "ReLU, N(0, 1²)": ("C1", "-"),
+        "ReLU, Xavier": ("C4", "--"),
+        "ReLU, He": ("C2", "-"),
+        "tanh, N(0, 1²)": ("C1", ":"),
+        "tanh, Xavier": ("C0", ":"),
+    }
     for label, (act_std, grad_rms, *_rest) in results.items():
         color, ls = styles[label]
         layers = np.arange(1, len(act_std) + 1)
         ax1.plot(layers, act_std, color=color, ls=ls, marker="o", ms=4, label=label)
         ax2.plot(layers, grad_rms, color=color, ls=ls, marker="o", ms=4, label=label)
-    ax1.set(title="Layer output std (forward signal)", xlabel="Dense layer", ylabel="std of layer output", yscale="log")
-    ax2.set(title="Gradient arriving at each layer's input (backward signal)", xlabel="Dense layer",
-            ylabel="rms of dL/d(input)", yscale="log")
+    ax1.set(
+        title="Layer output std (forward signal)",
+        xlabel="Dense layer",
+        ylabel="std of layer output",
+        yscale="log",
+    )
+    ax2.set(
+        title="Gradient arriving at each layer's input (backward signal)",
+        xlabel="Dense layer",
+        ylabel="rms of dL/d(input)",
+        yscale="log",
+    )
     ax1.legend(fontsize=8)
     fig.tight_layout()
     path.parent.mkdir(exist_ok=True)
@@ -137,8 +152,16 @@ def make_optimizer(cfg):
 def train_one(cfg, data, seed, epochs=EPOCHS):
     (x_tr, y_tr), (x_va, y_va), _ = data
     model = build_mlp(SIZES, ReLU, cfg["init"], make_optimizer(cfg), seed=seed)
-    history = model.fit(x_tr, one_hot(y_tr, 10), epochs=epochs, batch_size=BATCH, seed=seed,
-                        validation_data=(x_va, one_hot(y_va, 10)), metrics={"accuracy": accuracy}, verbose=0)
+    history = model.fit(
+        x_tr,
+        one_hot(y_tr, 10),
+        epochs=epochs,
+        batch_size=BATCH,
+        seed=seed,
+        validation_data=(x_va, one_hot(y_va, 10)),
+        metrics={"accuracy": accuracy},
+        verbose=0,
+    )
     return model, history
 
 
@@ -171,7 +194,9 @@ def run_comparison(data, seeds, epochs=EPOCHS, configs=None, cache_dir=None, bud
             if cache is not None:
                 cache.write_text(json.dumps(results[name]))
         final = np.mean([r["val_accuracy"][-1] for r in results[name]["runs"]])
-        print(f"  {name:<32} final val accuracy {final:.2%}  (mean of {len(seeds)} seeds)", flush=True)
+        print(
+            f"  {name:<32} final val accuracy {final:.2%}  (mean of {len(seeds)} seeds)", flush=True
+        )
     return results
 
 
@@ -184,8 +209,10 @@ def summarize(results):
         train_loss = np.array([r["loss"] for r in res["runs"]])
         hit = [next((e + 1 for e, a in enumerate(run) if a >= 0.97), None) for run in acc]
         rows[name] = {
-            "val_acc_mean": acc.mean(axis=0).tolist(), "val_acc_std": acc.std(axis=0).tolist(),
-            "val_loss_mean": loss.mean(axis=0).tolist(), "train_loss_mean": train_loss.mean(axis=0).tolist(),
+            "val_acc_mean": acc.mean(axis=0).tolist(),
+            "val_acc_std": acc.std(axis=0).tolist(),
+            "val_loss_mean": loss.mean(axis=0).tolist(),
+            "train_loss_mean": train_loss.mean(axis=0).tolist(),
             "epochs_to_97pct": hit,
         }
     return rows
@@ -206,7 +233,12 @@ def plot_comparison(summary, path):
         ax1.plot(epochs, m, color=c, ls=ls, marker="o", ms=3, label=name)
         ax1.fill_between(epochs, m - sd, m + sd, color=c, alpha=0.15)
         ax2.plot(epochs, s["train_loss_mean"], color=c, ls=ls, marker="o", ms=3, label=name)
-    ax1.set(title="Validation accuracy (mean ± std over seeds)", xlabel="epoch", ylabel="accuracy", ylim=(0.8, 0.99))
+    ax1.set(
+        title="Validation accuracy (mean ± std over seeds)",
+        xlabel="epoch",
+        ylabel="accuracy",
+        ylim=(0.8, 0.99),
+    )
     ax1.legend(loc="lower right", fontsize=8)
     ax2.set(title="Training loss (mean over seeds)", xlabel="epoch", ylabel="loss", yscale="log")
     fig.tight_layout()
@@ -217,11 +249,15 @@ def plot_comparison(summary, path):
 def sweep(data, epochs=EPOCHS, seed=0):
     """Validation-only learning-rate sweep for the He configurations."""
     print("lr sweep (validation set, seed 0; score = mean val accuracy of the last 3 epochs)\n")
-    grid = [("sgd", lr) for lr in (0.05, 0.1, 0.2)] + [("momentum", lr) for lr in (0.005, 0.01, 0.02, 0.05)]
+    grid = [("sgd", lr) for lr in (0.05, 0.1, 0.2)] + [
+        ("momentum", lr) for lr in (0.005, 0.01, 0.02, 0.05)
+    ]
     for opt, lr in grid:
         _, h = train_one(dict(init="he", opt=opt, lr=lr), data, seed, epochs)
         va = h["val_accuracy"]
-        print(f"  He + {opt:<8} lr={lr:<6} score {np.mean(va[-3:]):.4f}   epoch1 {va[0]:.4f}  epoch3 {va[2]:.4f}  final {va[-1]:.4f}")
+        print(
+            f"  He + {opt:<8} lr={lr:<6} score {np.mean(va[-3:]):.4f}   epoch1 {va[0]:.4f}  epoch3 {va[2]:.4f}  final {va[-1]:.4f}"
+        )
 
 
 def main():
@@ -230,7 +266,11 @@ def main():
     parser.add_argument("--sweep", action="store_true", help="run the learning-rate sweep and exit")
     parser.add_argument("--seeds", type=int, default=3)
     parser.add_argument("--epochs", type=int, default=EPOCHS)
-    parser.add_argument("--budget", type=float, help="stop starting new configurations after this many seconds (resumable)")
+    parser.add_argument(
+        "--budget",
+        type=float,
+        help="stop starting new configurations after this many seconds (resumable)",
+    )
     args = parser.parse_args()
 
     if args.sweep:
@@ -241,8 +281,10 @@ def main():
         print("Part 1: signal size through a 10-layer network (500 random samples)\n")
         results = signal_through_depth()
         for label, (act_std, grad_rms, warnings, _) in results.items():
-            print(f"  {label:<20} output std: layer 1 {act_std[0]:.2e} -> layer 10 {act_std[-1]:.2e}   "
-                  f"| gradient at layer 1 input / layer 10 input: {grad_rms[0] / grad_rms[-1]:.1e}")
+            print(
+                f"  {label:<20} output std: layer 1 {act_std[0]:.2e} -> layer 10 {act_std[-1]:.2e}   "
+                f"| gradient at layer 1 input / layer 10 input: {grad_rms[0] / grad_rms[-1]:.1e}"
+            )
             for w in warnings:
                 print(f"      WARNING: {w}")
         plot_signal(results, ROOT / "assets" / "day9_signal_through_depth.png")
@@ -251,15 +293,30 @@ def main():
     if args.part in (None, 2):
         print(f"Part 2: MNIST, {args.seeds} seeds x {args.epochs} epochs per configuration\n")
         data = load_mnist(data_dir=ROOT / "data")
-        raw = run_comparison(data, seeds=list(range(args.seeds)), epochs=args.epochs,
-                             cache_dir=ROOT / "data" / "day9_cache", budget=args.budget)
+        raw = run_comparison(
+            data,
+            seeds=list(range(args.seeds)),
+            epochs=args.epochs,
+            cache_dir=ROOT / "data" / "day9_cache",
+            budget=args.budget,
+        )
         if raw is None:
             return
         summary = summarize(raw)
         out = ROOT / "results" / "day9_init_comparison.json"
         out.parent.mkdir(exist_ok=True)
-        out.write_text(json.dumps({"epochs": args.epochs, "seeds": list(range(args.seeds)), "batch_size": BATCH,
-                                   "architecture": SIZES, "summary": summary}, indent=2))
+        out.write_text(
+            json.dumps(
+                {
+                    "epochs": args.epochs,
+                    "seeds": list(range(args.seeds)),
+                    "batch_size": BATCH,
+                    "architecture": SIZES,
+                    "summary": summary,
+                },
+                indent=2,
+            )
+        )
         plot_comparison(summary, ROOT / "assets" / "day9_mnist_init_comparison.png")
         print("\nSaved results/day9_init_comparison.json and assets/day9_mnist_init_comparison.png")
 

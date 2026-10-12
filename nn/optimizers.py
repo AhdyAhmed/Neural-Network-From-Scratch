@@ -14,7 +14,10 @@ Param = tuple[np.ndarray, np.ndarray]
 
 
 class Optimizer:
+    """Base interface for in-place parameter updates."""
+
     def step(self, params: list[Param]) -> None:
+        """Update parameter arrays in place from matching gradient arrays."""
         raise NotImplementedError
 
 
@@ -29,19 +32,23 @@ class _Stateful(Optimizer):
     def __init__(self) -> None:
         self._state: list[list[np.ndarray]] | None = None  # _state[slot][param_index]
         self._params: tuple[np.ndarray, ...] | None = None
-        self.t = 0                                          # number of steps taken
+        self.t = 0  # number of steps taken
 
     def _slots(self, params: list[Param], n_slots: int) -> list[list[np.ndarray]]:
         values = tuple(value for value, _ in params)
         if self._state is None:
             self._state = [[np.zeros_like(value) for value, _ in params] for _ in range(n_slots)]
             self._params = values
-        elif self._params is None or len(self._params) != len(values) or any(
-            old is not value for old, value in zip(self._params, values)
-        ) or len(self._state[0]) != len(params) or any(
-            a.shape != value.shape for a, (value, _) in zip(self._state[0], params)
+        elif (
+            self._params is None
+            or len(self._params) != len(values)
+            or any(old is not value for old, value in zip(self._params, values))
+            or len(self._state[0]) != len(params)
+            or any(a.shape != value.shape for a, (value, _) in zip(self._state[0], params))
         ):
-            raise ValueError("Optimizer was used with a different set of parameters; call reset() first.")
+            raise ValueError(
+                "Optimizer was used with a different set of parameters; call reset() first."
+            )
         return self._state
 
     def reset(self) -> None:
@@ -60,6 +67,7 @@ class SGD(Optimizer):
         self.lr = lr
 
     def step(self, params: list[Param]) -> None:
+        """Apply one plain stochastic-gradient-descent update."""
         for value, grad in params:
             value -= self.lr * grad
 
@@ -91,6 +99,7 @@ class Momentum(_Stateful):
         self.beta = beta
 
     def step(self, params: list[Param]) -> None:
+        """Apply one momentum update and advance the step counter."""
         (velocity,) = self._slots(params, 1)
         self.t += 1
         for v, (value, grad) in zip(velocity, params):
@@ -125,6 +134,7 @@ class RMSProp(_Stateful):
         self.lr, self.rho, self.eps = lr, rho, eps
 
     def step(self, params: list[Param]) -> None:
+        """Apply one RMSProp update and advance the step counter."""
         (sq,) = self._slots(params, 1)
         self.t += 1
         for s_, (value, grad) in zip(sq, params):
@@ -150,7 +160,9 @@ class Adam(_Stateful):
     first update is ``lr * sign(grad)``, and the correction fades as ``t`` grows.
     """
 
-    def __init__(self, lr: float = 0.001, beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8) -> None:
+    def __init__(
+        self, lr: float = 0.001, beta1: float = 0.9, beta2: float = 0.999, eps: float = 1e-8
+    ) -> None:
         super().__init__()
         if lr <= 0:
             raise ValueError("Learning rate must be positive.")
@@ -161,9 +173,10 @@ class Adam(_Stateful):
         self.lr, self.beta1, self.beta2, self.eps = lr, beta1, beta2, eps
 
     def step(self, params: list[Param]) -> None:
+        """Apply one bias-corrected Adam update and advance the step counter."""
         m_all, v_all = self._slots(params, 2)
         self.t += 1
-        c1 = 1.0 - self.beta1**self.t   # bias corrections
+        c1 = 1.0 - self.beta1**self.t  # bias corrections
         c2 = 1.0 - self.beta2**self.t
         for m, v, (value, grad) in zip(m_all, v_all, params):
             m *= self.beta1

@@ -16,7 +16,7 @@ def build():
 
 
 def dataset():
-    x = np.array([[1., 0.], [0., 1.], [1., 1.], [-1., 0.]])
+    x = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [-1.0, 0.0]])
     y = one_hot(np.array([0, 1, 0, 1]), 3)
     return x, y
 
@@ -27,8 +27,9 @@ def test_early_stopping_stops_after_patience_and_restores_best_weights():
     reference = build()
     reference.fit(x, y, epochs=1, validation_data=(x, y), verbose=0)
     best_params = [value.copy() for value, _ in reference.params()]
-    history = model.fit(x, y, epochs=20, validation_data=(x, y), early_stopping=True,
-                        patience=2, verbose=0)
+    history = model.fit(
+        x, y, epochs=20, validation_data=(x, y), early_stopping=True, patience=2, verbose=0
+    )
     assert len(history["loss"]) == 3
     for (value, _), expected in zip(model.params(), best_params):
         np.testing.assert_array_equal(value, expected)
@@ -40,11 +41,15 @@ def test_early_stopping_requires_validation_data():
         build().fit(x, y, epochs=2, early_stopping=True, verbose=0)
 
 
-@pytest.mark.parametrize("kwargs", [{"patience": 0}, {"min_delta": -0.1}, {"min_delta": float("nan")}])
+@pytest.mark.parametrize(
+    "kwargs", [{"patience": 0}, {"min_delta": -0.1}, {"min_delta": float("nan")}]
+)
 def test_early_stopping_arguments_are_validated(kwargs):
     x, y = dataset()
     with pytest.raises(ValueError):
-        build().fit(x, y, epochs=2, validation_data=(x, y), early_stopping=True, verbose=0, **kwargs)
+        build().fit(
+            x, y, epochs=2, validation_data=(x, y), early_stopping=True, verbose=0, **kwargs
+        )
 
 
 def test_default_training_still_runs_requested_epochs():

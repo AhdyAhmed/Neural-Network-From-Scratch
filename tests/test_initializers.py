@@ -38,7 +38,9 @@ def test_he_uniform_bounds_and_variance():
     w = he_uniform(FAN_IN, FAN_OUT, rng())
     limit = np.sqrt(6 / FAN_IN)
     assert w.min() >= -limit and w.max() <= limit
-    assert np.isclose(w.std(), np.sqrt(2 / FAN_IN), rtol=0.02)  # same variance as the normal version
+    assert np.isclose(
+        w.std(), np.sqrt(2 / FAN_IN), rtol=0.02
+    )  # same variance as the normal version
 
 
 def test_xavier_uniform_bounds_and_variance():
@@ -79,9 +81,15 @@ def test_normal_rejects_non_positive_scale(scale):
 # --------------------------------------------------------------- registry
 @pytest.mark.parametrize(
     "name, fn",
-    [("he", he_normal), ("He_Normal", he_normal), ("he_uniform", he_uniform),
-     ("xavier", xavier_normal), ("glorot", xavier_normal), ("glorot_uniform", xavier_uniform),
-     ("xavier_uniform", xavier_uniform)],
+    [
+        ("he", he_normal),
+        ("He_Normal", he_normal),
+        ("he_uniform", he_uniform),
+        ("xavier", xavier_normal),
+        ("glorot", xavier_normal),
+        ("glorot_uniform", xavier_uniform),
+        ("xavier_uniform", xavier_uniform),
+    ],
 )
 def test_get_initializer_by_name(name, fn):
     assert get_initializer(name) is fn

@@ -56,6 +56,7 @@ class _RestrictedUnpickler(pickle.Unpickler):
 
 
 def sha256_of(path: Path) -> str:
+    """Return the lowercase SHA-256 digest of a file."""
     digest = hashlib.sha256()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):

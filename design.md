@@ -250,8 +250,8 @@ Planned plots:
 - [x] **Phase 2 – Verification:** gradient checker, unit tests, XOR example
 - [x] **Phase 3 – Classification:** `Softmax`, cross-entropy losses, mini-batching, MNIST
 - [x] **Phase 4 – Better training:** Momentum, RMSProp, Adam, He/Xavier init
-- [ ] **Phase 5 – Regularization:** L2, Dropout, early stopping
-- [ ] **Phase 6 – Polish:** README with results, walkthrough notebook, CI (GitHub Actions running `pytest`)
+- [x] **Phase 5 – Regularization:** L2, Dropout, early stopping
+- [x] **Phase 6 – Polish:** README with results, walkthrough notebook, CI (GitHub Actions running `pytest`)
 
 ### Stretch goals
 - Batch Normalization

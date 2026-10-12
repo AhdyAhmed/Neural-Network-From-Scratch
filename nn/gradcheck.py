@@ -36,7 +36,9 @@ DEFAULT_TOL = 1e-6
 
 
 # --------------------------------------------------------------- primitives
-def numerical_gradient(f: Callable[[], float], x: np.ndarray, eps: float = DEFAULT_EPS) -> np.ndarray:
+def numerical_gradient(
+    f: Callable[[], float], x: np.ndarray, eps: float = DEFAULT_EPS
+) -> np.ndarray:
     """Centered finite-difference gradient of the scalar function ``f`` w.r.t. ``x``.
 
     ``f`` takes no arguments and must read ``x`` itself; ``x`` is perturbed
@@ -76,19 +78,24 @@ class GradCheckResult:
 
     @property
     def max_error(self) -> float:
+        """Largest recorded relative error, or zero when no values were checked."""
         return max(self.errors.values()) if self.errors else 0.0
 
     @property
     def passed(self) -> bool:
+        """Whether every recorded error is strictly below the tolerance."""
         return all(e < self.tol for e in self.errors.values())
 
     def assert_passed(self) -> None:
+        """Raise ``AssertionError`` with details when any check fails."""
         if not self.passed:
             raise AssertionError(f"Gradient check failed (tol={self.tol:g}):\n{self}")
 
     def __str__(self) -> str:
-        lines = [f"  {name:<28} {err:.3e}  {'ok' if err < self.tol else 'FAIL'}"
-                 for name, err in self.errors.items()]
+        lines = [
+            f"  {name:<28} {err:.3e}  {'ok' if err < self.tol else 'FAIL'}"
+            for name, err in self.errors.items()
+        ]
         return "\n".join(lines)
 
 

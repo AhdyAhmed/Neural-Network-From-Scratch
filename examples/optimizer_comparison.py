@@ -73,9 +73,21 @@ def plot_quadratic(paths, path_out):
         ax2.plot(dist, color=c, label=name)
     ax1.plot(*MINIMUM, "k*", ms=14)
     ax1.plot(*START, "ks", ms=7)
-    ax1.set(title="Paths on f = ½(w₀² + 25w₁²) (shifted)", xlabel="w₀", ylabel="w₁", xlim=(-6, 7), ylim=(-9, 6))
+    ax1.set(
+        title="Paths on f = ½(w₀² + 25w₁²) (shifted)",
+        xlabel="w₀",
+        ylabel="w₁",
+        xlim=(-6, 7),
+        ylim=(-9, 6),
+    )
     ax1.legend(fontsize=8, loc="upper right")
-    ax2.set(title="Distance to the minimum", xlabel="step", ylabel="‖w − w*‖", yscale="log", ylim=(1e-9, 20))
+    ax2.set(
+        title="Distance to the minimum",
+        xlabel="step",
+        ylabel="‖w − w*‖",
+        yscale="log",
+        ylim=(1e-9, 20),
+    )
     ax2.legend(fontsize=8)
     fig.tight_layout()
     path_out.parent.mkdir(exist_ok=True)
@@ -94,16 +106,28 @@ TUNED = {
 
 
 def make_optimizer(cfg):
-    return {"sgd": lambda: SGD(cfg["lr"]), "momentum": lambda: Momentum(cfg["lr"], 0.9),
-            "rmsprop": lambda: RMSProp(cfg["lr"]), "adam": lambda: Adam(cfg["lr"])}[cfg["opt"]]()
+    return {
+        "sgd": lambda: SGD(cfg["lr"]),
+        "momentum": lambda: Momentum(cfg["lr"], 0.9),
+        "rmsprop": lambda: RMSProp(cfg["lr"]),
+        "adam": lambda: Adam(cfg["lr"]),
+    }[cfg["opt"]]()
 
 
 def train_one(cfg, data, seed, epochs=EPOCHS):
     (x_tr, y_tr), (x_va, y_va), _ = data
     model = build_mlp(SIZES, ReLU, "he", make_optimizer(cfg), seed=seed)
     start = time.perf_counter()
-    h = model.fit(x_tr, one_hot(y_tr, 10), epochs=epochs, batch_size=BATCH, seed=seed,
-                  validation_data=(x_va, one_hot(y_va, 10)), metrics={"accuracy": accuracy}, verbose=0)
+    h = model.fit(
+        x_tr,
+        one_hot(y_tr, 10),
+        epochs=epochs,
+        batch_size=BATCH,
+        seed=seed,
+        validation_data=(x_va, one_hot(y_va, 10)),
+        metrics={"accuracy": accuracy},
+        verbose=0,
+    )
     h = {k: [float(v) for v in vals] for k, vals in h.items()}
     h["seconds_per_epoch"] = (time.perf_counter() - start) / epochs
     return h
@@ -111,17 +135,23 @@ def train_one(cfg, data, seed, epochs=EPOCHS):
 
 def sweep(data, epochs=EPOCHS, seed=0):
     print("lr sweep (validation set, seed 0; score = mean val accuracy of the last 3 epochs)\n")
-    grid = [("rmsprop", lr) for lr in (1e-4, 3e-4, 1e-3, 3e-3)] + [("adam", lr) for lr in (3e-4, 1e-3, 3e-3, 1e-2)]
+    grid = [("rmsprop", lr) for lr in (1e-4, 3e-4, 1e-3, 3e-3)] + [
+        ("adam", lr) for lr in (3e-4, 1e-3, 3e-3, 1e-2)
+    ]
     for opt, lr in grid:
         h = train_one(dict(opt=opt, lr=lr), data, seed, epochs)
         va = h["val_accuracy"]
-        print(f"  {opt:<8} lr={lr:<7g} score {np.mean(va[-3:]):.4f}   epoch1 {va[0]:.4f}  epoch3 {va[2]:.4f}  final {va[-1]:.4f}")
+        print(
+            f"  {opt:<8} lr={lr:<7g} score {np.mean(va[-3:]):.4f}   epoch1 {va[0]:.4f}  epoch3 {va[2]:.4f}  final {va[-1]:.4f}"
+        )
 
 
 def run_comparison(data, seeds, epochs, cache_dir, budget=None):
     results, start = {}, time.perf_counter()
     for name, cfg in TUNED.items():
-        cache = Path(cache_dir) / (re.sub(r"\W+", "_", name) + f"_lr{cfg['lr']}_s{len(seeds)}_e{epochs}.json")
+        cache = Path(cache_dir) / (
+            re.sub(r"\W+", "_", name) + f"_lr{cfg['lr']}_s{len(seeds)}_e{epochs}.json"
+        )
         cache.parent.mkdir(parents=True, exist_ok=True)
         if cache.exists():
             runs, tag = json.loads(cache.read_text()), " (cached)"
@@ -132,7 +162,10 @@ def run_comparison(data, seeds, epochs, cache_dir, budget=None):
             runs, tag = [train_one(cfg, data, s, epochs) for s in seeds], ""
             cache.write_text(json.dumps(runs))
         results[name] = {"config": cfg, "runs": runs}
-        print(f"  {name:<10} lr={cfg['lr']:<6g} final val accuracy {np.mean([r['val_accuracy'][-1] for r in runs]):.2%}{tag}", flush=True)
+        print(
+            f"  {name:<10} lr={cfg['lr']:<6g} final val accuracy {np.mean([r['val_accuracy'][-1] for r in runs]):.2%}{tag}",
+            flush=True,
+        )
     return results
 
 
@@ -143,9 +176,14 @@ def summarize(results):
         stack = lambda key: np.array([r[key] for r in runs])
         out[name] = {
             "config": res["config"],
-            "val_acc_mean": stack("val_accuracy").mean(0).tolist(), "val_acc_std": stack("val_accuracy").std(0).tolist(),
-            "val_loss_mean": stack("val_loss").mean(0).tolist(), "train_loss_mean": stack("loss").mean(0).tolist(),
-            "epochs_to_97pct": [next((e + 1 for e, a in enumerate(r["val_accuracy"]) if a >= 0.97), None) for r in runs],
+            "val_acc_mean": stack("val_accuracy").mean(0).tolist(),
+            "val_acc_std": stack("val_accuracy").std(0).tolist(),
+            "val_loss_mean": stack("val_loss").mean(0).tolist(),
+            "train_loss_mean": stack("loss").mean(0).tolist(),
+            "epochs_to_97pct": [
+                next((e + 1 for e, a in enumerate(r["val_accuracy"]) if a >= 0.97), None)
+                for r in runs
+            ],
             "seconds_per_epoch": float(np.mean([r["seconds_per_epoch"] for r in runs])),
         }
     return out
@@ -166,7 +204,9 @@ def plot_comparison(summary, path):
         axes[0].fill_between(epochs, m - sd, m + sd, color=c, alpha=0.15)
         axes[1].plot(epochs, s["train_loss_mean"], "-o", ms=3, color=c, label=label)
         axes[2].plot(epochs, s["val_loss_mean"], "-o", ms=3, color=c, label=label)
-    axes[0].set(title="Validation accuracy (mean ± std, 3 seeds)", xlabel="epoch", ylim=(0.88, 0.985))
+    axes[0].set(
+        title="Validation accuracy (mean ± std, 3 seeds)", xlabel="epoch", ylim=(0.88, 0.985)
+    )
     axes[1].set(title="Training loss", xlabel="epoch", yscale="log")
     axes[2].set(title="Validation loss", xlabel="epoch", yscale="log")
     axes[0].legend(fontsize=8, loc="lower right")
@@ -181,7 +221,11 @@ def main():
     parser.add_argument("--sweep", action="store_true")
     parser.add_argument("--seeds", type=int, default=3)
     parser.add_argument("--epochs", type=int, default=EPOCHS)
-    parser.add_argument("--budget", type=float, help="stop starting new configurations after this many seconds (resumable)")
+    parser.add_argument(
+        "--budget",
+        type=float,
+        help="stop starting new configurations after this many seconds (resumable)",
+    )
     args = parser.parse_args()
 
     if args.sweep:
@@ -193,24 +237,44 @@ def main():
         paths = {name: quadratic_path(make()) for name, make in QUAD_SETTINGS.items()}
         for name, p in paths.items():
             hit = steps_to_reach(p, 1e-3)
-            print(f"  {name:<28} distance after 300 steps: {np.linalg.norm(p[-1] - MINIMUM):.2e}   "
-                  f"steps to get within 1e-3: {hit if hit is not None else 'not reached'}")
+            print(
+                f"  {name:<28} distance after 300 steps: {np.linalg.norm(p[-1] - MINIMUM):.2e}   "
+                f"steps to get within 1e-3: {hit if hit is not None else 'not reached'}"
+            )
         plot_quadratic(paths, ROOT / "assets" / "day10_quadratic.png")
         print("\nSaved assets/day10_quadratic.png\n")
 
     if args.part in (None, 2):
         print(f"Part 2: MNIST, {args.seeds} seeds x {args.epochs} epochs per optimizer\n")
-        raw = run_comparison(load_mnist(data_dir=ROOT / "data"), list(range(args.seeds)), args.epochs,
-                             ROOT / "data" / "day10_cache", args.budget)
+        raw = run_comparison(
+            load_mnist(data_dir=ROOT / "data"),
+            list(range(args.seeds)),
+            args.epochs,
+            ROOT / "data" / "day10_cache",
+            args.budget,
+        )
         if raw is None:
             return
         summary = summarize(raw)
         out = ROOT / "results" / "day10_optimizer_comparison.json"
         out.parent.mkdir(exist_ok=True)
-        out.write_text(json.dumps({"epochs": args.epochs, "seeds": list(range(args.seeds)), "batch_size": BATCH,
-                                   "architecture": SIZES, "init": "he", "summary": summary}, indent=2))
+        out.write_text(
+            json.dumps(
+                {
+                    "epochs": args.epochs,
+                    "seeds": list(range(args.seeds)),
+                    "batch_size": BATCH,
+                    "architecture": SIZES,
+                    "init": "he",
+                    "summary": summary,
+                },
+                indent=2,
+            )
+        )
         plot_comparison(summary, ROOT / "assets" / "day10_optimizer_comparison.png")
-        print("\nSaved results/day10_optimizer_comparison.json and assets/day10_optimizer_comparison.png")
+        print(
+            "\nSaved results/day10_optimizer_comparison.json and assets/day10_optimizer_comparison.png"
+        )
 
 
 if __name__ == "__main__":

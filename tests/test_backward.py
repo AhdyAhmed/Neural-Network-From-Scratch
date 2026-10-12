@@ -26,10 +26,10 @@ def test_dense_backward_matches_manual_computation():
     g = np.array([[1.0, 0.0], [0.0, 1.0]])
     layer.forward(x)
     dx = layer.backward(g)
-    assert np.allclose(layer.dW, x.T @ g)                  # [[1, 3], [2, 4]]
+    assert np.allclose(layer.dW, x.T @ g)  # [[1, 3], [2, 4]]
     assert np.allclose(layer.dW, [[1.0, 3.0], [2.0, 4.0]])
     assert np.allclose(layer.db, [[1.0, 1.0]])
-    assert np.allclose(dx, [[1.0, 3.0], [2.0, 4.0]])       # g @ W^T
+    assert np.allclose(dx, [[1.0, 3.0], [2.0, 4.0]])  # g @ W^T
 
 
 def test_dense_params_stay_linked_to_gradients():

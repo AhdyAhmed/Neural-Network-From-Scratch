@@ -87,10 +87,12 @@ def get_initializer(spec: str | Initializer) -> Initializer:
     try:
         return _REGISTRY[spec.lower()]
     except (KeyError, AttributeError):
-        raise ValueError(f"Unknown initializer {spec!r}. Choose from: {sorted(_REGISTRY)}.") from None
+        raise ValueError(
+            f"Unknown initializer {spec!r}. Choose from: {sorted(_REGISTRY)}."
+        ) from None
 
 
-def initializer_for(activation) -> Initializer:
+def initializer_for(activation: object | None) -> Initializer:
     """The recommended initializer for the layer that *feeds* ``activation``.
 
     ReLU  -> He.   Tanh / Sigmoid / Softmax / None / anything else -> Xavier.

@@ -22,25 +22,27 @@ from nn.model import Sequential
 
 # Thresholds used by diagnose(). Deliberately loose: they flag real trouble, not mild imbalance.
 # (For reference, a He-initialised ReLU net has dense-layer output std ~1 and dW/W between 0.01 and 0.5.)
-VANISH_BELOW = 1e-3        # absolute output std below this, or first/last gradient ratio below it
-EXPLODE_ABOVE = 1e3        # absolute output std above this, or first/last gradient ratio above it
-UPDATE_TOO_SMALL = 1e-6    # rms(dW) / rms(W) below this: weights barely move, learning stalls
-UPDATE_TOO_LARGE = 1e2     # rms(dW) / rms(W) above this: a normal step rewrites the weights
-DEAD_ZERO_FRACTION = 0.3   # share of ReLU units that output 0 for every sample in the batch
-SATURATED_FRACTION = 0.5   # share of tanh / sigmoid outputs pinned near their limits
+VANISH_BELOW = 1e-3  # absolute output std below this, or first/last gradient ratio below it
+EXPLODE_ABOVE = 1e3  # absolute output std above this, or first/last gradient ratio above it
+UPDATE_TOO_SMALL = 1e-6  # rms(dW) / rms(W) below this: weights barely move, learning stalls
+UPDATE_TOO_LARGE = 1e2  # rms(dW) / rms(W) above this: a normal step rewrites the weights
+DEAD_ZERO_FRACTION = 0.3  # share of ReLU units that output 0 for every sample in the batch
+SATURATED_FRACTION = 0.5  # share of tanh / sigmoid outputs pinned near their limits
 
 
 @dataclass
 class LayerStats:
+    """Activation and gradient statistics captured for one model layer."""
+
     index: int
     name: str
     out_mean: float
     out_std: float
     out_abs_max: float
-    frac_zero: float           # share of outputs that are exactly 0
-    frac_dead_units: float     # share of units (columns) that are 0 for the whole batch
-    frac_saturated: float      # tanh/sigmoid: share of outputs within 1% of a limit
-    grad_in_rms: float         # rms of dL/d(layer input) arriving at this layer
+    frac_zero: float  # share of outputs that are exactly 0
+    frac_dead_units: float  # share of units (columns) that are 0 for the whole batch
+    frac_saturated: float  # tanh/sigmoid: share of outputs within 1% of a limit
+    grad_in_rms: float  # rms of dL/d(layer input) arriving at this layer
     weight_rms: float | None = None
     weight_grad_rms: float | None = None
 
@@ -94,7 +96,9 @@ def collect_statistics(model: Sequential, x: np.ndarray, y: np.ndarray) -> list[
             out_std=float(out.std()),
             out_abs_max=float(np.abs(out).max()),
             frac_zero=float(np.mean(out == 0)),
-            frac_dead_units=float(np.mean(np.all(out == 0, axis=0))) if isinstance(layer, ReLU) else 0.0,
+            frac_dead_units=(
+                float(np.mean(np.all(out == 0, axis=0))) if isinstance(layer, ReLU) else 0.0
+            ),
             frac_saturated=saturated,
             grad_in_rms=_rms(grads_in[i]) if i < len(grads_in) else float("nan"),
         )
@@ -107,11 +111,17 @@ def collect_statistics(model: Sequential, x: np.ndarray, y: np.ndarray) -> list[
 
 def format_statistics(stats: list[LayerStats]) -> str:
     """A fixed-width table: output statistics on the left, gradient statistics on the right."""
-    header = (f"{'#':>2} {'layer':<16} {'out mean':>9} {'out std':>9} {'|out| max':>10} {'%zero':>6} "
-              f"{'%sat':>5} | {'grad-in rms':>11} {'weight rms':>11} {'dW rms':>10} {'dW/W':>9}")
+    header = (
+        f"{'#':>2} {'layer':<16} {'out mean':>9} {'out std':>9} {'|out| max':>10} {'%zero':>6} "
+        f"{'%sat':>5} | {'grad-in rms':>11} {'weight rms':>11} {'dW rms':>10} {'dW/W':>9}"
+    )
     lines = [header, "-" * len(header)]
     for s in stats:
-        w = f"{s.weight_rms:>11.3e} {s.weight_grad_rms:>10.3e} {s.update_ratio:>9.2e}" if s.weight_rms is not None else f"{'':>11} {'':>10} {'':>9}"
+        w = (
+            f"{s.weight_rms:>11.3e} {s.weight_grad_rms:>10.3e} {s.update_ratio:>9.2e}"
+            if s.weight_rms is not None
+            else f"{'':>11} {'':>10} {'':>9}"
+        )
         lines.append(
             f"{s.index:>2} {s.name:<16} {s.out_mean:>9.2e} {s.out_std:>9.2e} {s.out_abs_max:>10.2e} "
             f"{100 * s.frac_zero:>5.0f}% {100 * s.frac_saturated:>4.0f}% | {s.grad_in_rms:>11.3e} {w}"
@@ -123,9 +133,15 @@ def diagnose(stats: list[LayerStats]) -> list[str]:
     """Human-readable warnings (one per kind of problem); an empty list means nothing alarming."""
     warnings: list[str] = []
 
-    bad = [s for s in stats if not all(np.isfinite(v) for v in (s.out_mean, s.out_std, s.out_abs_max, s.grad_in_rms))]
+    bad = [
+        s
+        for s in stats
+        if not all(np.isfinite(v) for v in (s.out_mean, s.out_std, s.out_abs_max, s.grad_in_rms))
+    ]
     if bad:
-        warnings.append(f"non-finite (NaN/inf) values in outputs or gradients, first at layer {bad[0].index} {bad[0].name}")
+        warnings.append(
+            f"non-finite (NaN/inf) values in outputs or gradients, first at layer {bad[0].index} {bad[0].name}"
+        )
 
     dense = [s for s in stats if s.weight_rms is not None]
     finite = [s for s in dense if np.isfinite(s.out_std)]
@@ -145,20 +161,38 @@ def diagnose(stats: list[LayerStats]) -> list[str]:
             f"(layer {a.index}: {a.out_std:.1e} ... layer {b.index}: {b.out_std:.1e})"
         )
 
-    if len(dense) >= 2 and all(np.isfinite(s.grad_in_rms) and s.grad_in_rms > 0 for s in (dense[0], dense[-1])):
+    if len(dense) >= 2 and all(
+        np.isfinite(s.grad_in_rms) and s.grad_in_rms > 0 for s in (dense[0], dense[-1])
+    ):
         ratio = dense[0].grad_in_rms / dense[-1].grad_in_rms
         if ratio < VANISH_BELOW:
-            warnings.append(f"vanishing gradients: gradient reaching the first layer is {ratio:.1e}x the last layer's")
+            warnings.append(
+                f"vanishing gradients: gradient reaching the first layer is {ratio:.1e}x the last layer's"
+            )
         elif ratio > EXPLODE_ABOVE:
-            warnings.append(f"exploding gradients: gradient reaching the first layer is {ratio:.1e}x the last layer's")
+            warnings.append(
+                f"exploding gradients: gradient reaching the first layer is {ratio:.1e}x the last layer's"
+            )
 
-    tiny = [s for s in dense if s.update_ratio is not None and np.isfinite(s.update_ratio) and s.update_ratio < UPDATE_TOO_SMALL]
+    tiny = [
+        s
+        for s in dense
+        if s.update_ratio is not None
+        and np.isfinite(s.update_ratio)
+        and s.update_ratio < UPDATE_TOO_SMALL
+    ]
     if tiny:
         warnings.append(
             f"negligible updates: dW/W < {UPDATE_TOO_SMALL:g} in {len(tiny)} layer(s) (e.g. layer {tiny[0].index}: "
             f"{tiny[0].update_ratio:.1e}), so the weights will barely move and learning will stall"
         )
-    huge = [s for s in dense if s.update_ratio is not None and np.isfinite(s.update_ratio) and s.update_ratio > UPDATE_TOO_LARGE]
+    huge = [
+        s
+        for s in dense
+        if s.update_ratio is not None
+        and np.isfinite(s.update_ratio)
+        and s.update_ratio > UPDATE_TOO_LARGE
+    ]
     if huge:
         warnings.append(
             f"huge updates: dW/W > {UPDATE_TOO_LARGE:g} in {len(huge)} layer(s) (e.g. layer {huge[0].index}: "
@@ -167,8 +201,17 @@ def diagnose(stats: list[LayerStats]) -> list[str]:
 
     dead = [s for s in stats if s.frac_dead_units > DEAD_ZERO_FRACTION]
     if dead:
-        warnings.append("dead ReLU units: " + ", ".join(f"layer {s.index} ({100 * s.frac_dead_units:.0f}% always 0)" for s in dead))
+        warnings.append(
+            "dead ReLU units: "
+            + ", ".join(f"layer {s.index} ({100 * s.frac_dead_units:.0f}% always 0)" for s in dead)
+        )
     saturated = [s for s in stats if s.frac_saturated > SATURATED_FRACTION]
     if saturated:
-        warnings.append("saturated units: " + ", ".join(f"layer {s.index} {s.name} ({100 * s.frac_saturated:.0f}% pinned)" for s in saturated))
+        warnings.append(
+            "saturated units: "
+            + ", ".join(
+                f"layer {s.index} {s.name} ({100 * s.frac_saturated:.0f}% pinned)"
+                for s in saturated
+            )
+        )
     return warnings

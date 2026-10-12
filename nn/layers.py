@@ -25,9 +25,11 @@ class Layer:
     """
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Transform a batch and cache any state required by ``backward``."""
         raise NotImplementedError
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        """Backpropagate an upstream gradient and return the input gradient."""
         raise NotImplementedError
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
@@ -76,10 +78,14 @@ class Dense(Layer):
         self.out_features = out_features
 
         rng = rng if rng is not None else np.random.default_rng(seed)
-        init_fn = get_initializer(initializer) if initializer is not None else normal(init_scale or 0.01)
+        init_fn = (
+            get_initializer(initializer) if initializer is not None else normal(init_scale or 0.01)
+        )
         self.W = np.asarray(init_fn(in_features, out_features, rng), dtype=float)
         if self.W.shape != (in_features, out_features):
-            raise ValueError(f"initializer returned shape {self.W.shape}, expected {(in_features, out_features)}.")
+            raise ValueError(
+                f"initializer returned shape {self.W.shape}, expected {(in_features, out_features)}."
+            )
         self.b = np.zeros((1, out_features))
 
         # Gradients are filled in by backward(). They are updated in place so the
@@ -90,6 +96,7 @@ class Dense(Layer):
         self._x: np.ndarray | None = None  # cached input for backward
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Return ``x @ W + b`` for a two-dimensional input batch."""
         x = np.asarray(x, dtype=float)
         if x.ndim != 2 or x.shape[1] != self.in_features:
             raise ValueError(
@@ -121,6 +128,7 @@ class Dense(Layer):
         return grad_output @ self.W.T
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        """Return weight and bias arrays paired with their gradients."""
         return [(self.W, self.dW), (self.b, self.db)]
 
     def __repr__(self) -> str:
@@ -150,6 +158,7 @@ class Dropout(Layer):
         self._mask: np.ndarray | None = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Apply inverted dropout during training and act as identity at inference."""
         x = np.asarray(x, dtype=float)
         if x.ndim != 2:
             raise ValueError(f"Dropout expects 2D (N, features) input, got {x.shape}.")
@@ -161,6 +170,7 @@ class Dropout(Layer):
         return x * self._mask
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        """Apply the mask created by the most recent forward pass."""
         if self._mask is None:
             raise RuntimeError("backward() called before forward().")
         grad_output = np.asarray(grad_output, dtype=float)

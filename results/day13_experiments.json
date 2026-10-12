@@ -1,0 +1,493 @@
+{
+  "experiment": "Day 13 \u2014 reproducible MNIST experiments",
+  "seed": 2026,
+  "dataset": "MNIST (verified loader; canonical train/validation/test split)",
+  "split_sizes": {
+    "train": 50000,
+    "validation": 10000,
+    "test": 10000
+  },
+  "quick_mode": false,
+  "final_experiment": {
+    "name": "final_adam_he_dropout",
+    "config": {
+      "name": "final_adam_he_dropout",
+      "architecture": [
+        784,
+        128,
+        64,
+        10
+      ],
+      "optimizer": "Adam",
+      "learning_rate": 0.001,
+      "batch_size": 64,
+      "epochs": 15,
+      "initializer": "he",
+      "dropout_rate": 0.1,
+      "l2": 0.0,
+      "seed": 2026,
+      "shuffle_seed": 2027,
+      "early_stopping": true,
+      "patience": 3,
+      "min_delta": 0.0001
+    },
+    "epochs_completed": 9,
+    "best_validation_loss": 0.07930795593536927,
+    "final_recorded_validation_accuracy": 0.9787,
+    "training_seconds": 71.106,
+    "history": {
+      "loss": [
+        0.3516129,
+        0.1543432,
+        0.1115523,
+        0.0906149,
+        0.0762582,
+        0.0649505,
+        0.0554476,
+        0.0515289,
+        0.0445888
+      ],
+      "accuracy": [
+        0.89574,
+        0.95288,
+        0.9664,
+        0.97306,
+        0.97654,
+        0.9792,
+        0.98266,
+        0.9828,
+        0.98514
+      ],
+      "val_loss": [
+        0.1382876,
+        0.1053971,
+        0.1049539,
+        0.0877548,
+        0.081021,
+        0.079308,
+        0.0853986,
+        0.0835205,
+        0.0823643
+      ],
+      "val_accuracy": [
+        0.958,
+        0.9678,
+        0.968,
+        0.9744,
+        0.9769,
+        0.9774,
+        0.9775,
+        0.9762,
+        0.9787
+      ]
+    },
+    "test_accuracy": 0.9781,
+    "test_loss": 0.07312728315115276,
+    "test_confusion_matrix": [
+      [
+        974,
+        0,
+        0,
+        2,
+        0,
+        1,
+        0,
+        0,
+        2,
+        1
+      ],
+      [
+        0,
+        1124,
+        4,
+        0,
+        0,
+        1,
+        2,
+        0,
+        4,
+        0
+      ],
+      [
+        6,
+        1,
+        1009,
+        0,
+        2,
+        0,
+        5,
+        6,
+        3,
+        0
+      ],
+      [
+        1,
+        0,
+        7,
+        990,
+        1,
+        1,
+        0,
+        4,
+        5,
+        1
+      ],
+      [
+        2,
+        0,
+        8,
+        0,
+        964,
+        0,
+        3,
+        1,
+        1,
+        3
+      ],
+      [
+        3,
+        0,
+        0,
+        7,
+        2,
+        865,
+        9,
+        1,
+        4,
+        1
+      ],
+      [
+        8,
+        2,
+        0,
+        1,
+        4,
+        3,
+        940,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        4,
+        8,
+        1,
+        5,
+        0,
+        0,
+        1002,
+        2,
+        5
+      ],
+      [
+        5,
+        1,
+        3,
+        3,
+        3,
+        6,
+        3,
+        3,
+        943,
+        4
+      ],
+      [
+        3,
+        5,
+        0,
+        4,
+        21,
+        3,
+        1,
+        2,
+        0,
+        970
+      ]
+    ]
+  },
+  "ablations": [
+    {
+      "name": "baseline_no_dropout",
+      "config": {
+        "name": "baseline_no_dropout",
+        "architecture": [
+          784,
+          128,
+          64,
+          10
+        ],
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "epochs": 8,
+        "initializer": "he",
+        "dropout_rate": 0.0,
+        "l2": 0.0,
+        "seed": 2026,
+        "shuffle_seed": 2027,
+        "early_stopping": true,
+        "patience": 3,
+        "min_delta": 0.0001
+      },
+      "epochs_completed": 7,
+      "best_validation_loss": 0.08874570856409014,
+      "final_recorded_validation_accuracy": 0.9758,
+      "training_seconds": 46.183,
+      "history": {
+        "loss": [
+          0.2876374,
+          0.1184144,
+          0.0810589,
+          0.0595679,
+          0.0486141,
+          0.0359328,
+          0.0300747
+        ],
+        "accuracy": [
+          0.91652,
+          0.9651,
+          0.97586,
+          0.98186,
+          0.98462,
+          0.98902,
+          0.99034
+        ],
+        "val_loss": [
+          0.1417579,
+          0.1067991,
+          0.1006739,
+          0.0887457,
+          0.0911575,
+          0.0920226,
+          0.0972479
+        ],
+        "val_accuracy": [
+          0.9583,
+          0.9684,
+          0.9689,
+          0.9733,
+          0.9751,
+          0.9764,
+          0.9758
+        ]
+      }
+    },
+    {
+      "name": "dropout_0.10",
+      "config": {
+        "name": "dropout_0.10",
+        "architecture": [
+          784,
+          128,
+          64,
+          10
+        ],
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "epochs": 8,
+        "initializer": "he",
+        "dropout_rate": 0.1,
+        "l2": 0.0,
+        "seed": 2026,
+        "shuffle_seed": 2027,
+        "early_stopping": true,
+        "patience": 3,
+        "min_delta": 0.0001
+      },
+      "epochs_completed": 8,
+      "best_validation_loss": 0.07930795593536927,
+      "final_recorded_validation_accuracy": 0.9762,
+      "training_seconds": 46.015,
+      "history": {
+        "loss": [
+          0.3516129,
+          0.1543432,
+          0.1115523,
+          0.0906149,
+          0.0762582,
+          0.0649505,
+          0.0554476,
+          0.0515289
+        ],
+        "accuracy": [
+          0.89574,
+          0.95288,
+          0.9664,
+          0.97306,
+          0.97654,
+          0.9792,
+          0.98266,
+          0.9828
+        ],
+        "val_loss": [
+          0.1382876,
+          0.1053971,
+          0.1049539,
+          0.0877548,
+          0.081021,
+          0.079308,
+          0.0853986,
+          0.0835205
+        ],
+        "val_accuracy": [
+          0.958,
+          0.9678,
+          0.968,
+          0.9744,
+          0.9769,
+          0.9774,
+          0.9775,
+          0.9762
+        ]
+      }
+    },
+    {
+      "name": "xavier_no_dropout",
+      "config": {
+        "name": "xavier_no_dropout",
+        "architecture": [
+          784,
+          128,
+          64,
+          10
+        ],
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "epochs": 8,
+        "initializer": "xavier",
+        "dropout_rate": 0.0,
+        "l2": 0.0,
+        "seed": 2026,
+        "shuffle_seed": 2027,
+        "early_stopping": true,
+        "patience": 3,
+        "min_delta": 0.0001
+      },
+      "epochs_completed": 8,
+      "best_validation_loss": 0.08264171389532862,
+      "final_recorded_validation_accuracy": 0.9766,
+      "training_seconds": 42.229,
+      "history": {
+        "loss": [
+          0.2935731,
+          0.1220115,
+          0.0825179,
+          0.0601073,
+          0.0491914,
+          0.0359478,
+          0.0315375,
+          0.0250486
+        ],
+        "accuracy": [
+          0.91604,
+          0.96388,
+          0.97516,
+          0.98114,
+          0.98498,
+          0.98882,
+          0.98962,
+          0.99178
+        ],
+        "val_loss": [
+          0.1466952,
+          0.1043329,
+          0.1006798,
+          0.0863639,
+          0.0826417,
+          0.0942177,
+          0.0944855,
+          0.0927308
+        ],
+        "val_accuracy": [
+          0.9572,
+          0.968,
+          0.9697,
+          0.9745,
+          0.9766,
+          0.9742,
+          0.9753,
+          0.9766
+        ]
+      }
+    },
+    {
+      "name": "learning_rate_0.0003",
+      "config": {
+        "name": "learning_rate_0.0003",
+        "architecture": [
+          784,
+          128,
+          64,
+          10
+        ],
+        "optimizer": "Adam",
+        "learning_rate": 0.0003,
+        "batch_size": 64,
+        "epochs": 8,
+        "initializer": "he",
+        "dropout_rate": 0.0,
+        "l2": 0.0,
+        "seed": 2026,
+        "shuffle_seed": 2027,
+        "early_stopping": true,
+        "patience": 3,
+        "min_delta": 0.0001
+      },
+      "epochs_completed": 8,
+      "best_validation_loss": 0.08655215044201091,
+      "final_recorded_validation_accuracy": 0.9747,
+      "training_seconds": 49.399,
+      "history": {
+        "loss": [
+          0.4504116,
+          0.1908837,
+          0.1408633,
+          0.1121121,
+          0.0928771,
+          0.0771624,
+          0.0657734,
+          0.0575354
+        ],
+        "accuracy": [
+          0.87746,
+          0.9449,
+          0.9596,
+          0.96744,
+          0.97282,
+          0.9777,
+          0.9816,
+          0.98292
+        ],
+        "val_loss": [
+          0.2075658,
+          0.1544569,
+          0.1291532,
+          0.1140928,
+          0.1046505,
+          0.0985527,
+          0.0960913,
+          0.0865522
+        ],
+        "val_accuracy": [
+          0.9413,
+          0.9587,
+          0.9638,
+          0.9669,
+          0.9692,
+          0.9705,
+          0.9719,
+          0.9747
+        ]
+      }
+    }
+  ],
+  "notes": [
+    "All model initialization and minibatch shuffle seeds are recorded in each config.",
+    "Ablations use validation data only; test data is reserved for the final configuration.",
+    "Quick mode uses deterministic subsets and does not report a held-out test metric.",
+    "Training times vary by machine and are informational, not deterministic outputs."
+  ]
+}

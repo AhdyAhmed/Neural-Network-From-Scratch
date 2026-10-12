@@ -32,8 +32,15 @@ def test_no_metrics_keeps_history_unchanged():
 
 def test_metric_keys_and_lengths():
     x, y, _ = data()
-    h = make().fit(x, y, epochs=4, batch_size=16, validation_data=data(seed=1)[:2],
-                   metrics={"accuracy": accuracy}, verbose=0)
+    h = make().fit(
+        x,
+        y,
+        epochs=4,
+        batch_size=16,
+        validation_data=data(seed=1)[:2],
+        metrics={"accuracy": accuracy},
+        verbose=0,
+    )
     assert set(h) == {"loss", "accuracy", "val_loss", "val_accuracy"}
     assert all(len(v) == 4 for v in h.values())
 
@@ -46,7 +53,9 @@ def test_metric_without_validation_data():
 
 def test_accuracy_improves_with_training():
     x, y, _ = data(200)
-    h = make().fit(x, y, epochs=60, batch_size=32, seed=0, metrics={"accuracy": accuracy}, verbose=0)
+    h = make().fit(
+        x, y, epochs=60, batch_size=32, seed=0, metrics={"accuracy": accuracy}, verbose=0
+    )
     assert h["accuracy"][-1] > h["accuracy"][0] and h["accuracy"][-1] > 0.9
 
 
@@ -56,7 +65,9 @@ def test_running_metric_is_batch_size_weighted(batch):
     must equal the full-data accuracy however the (uneven) batches are cut."""
     x, y, labels = data(50)
     expected = accuracy(make(lr=1e-15).predict(x), labels)
-    h = make(lr=1e-15).fit(x, y, epochs=1, batch_size=batch, seed=0, metrics={"accuracy": accuracy}, verbose=0)
+    h = make(lr=1e-15).fit(
+        x, y, epochs=1, batch_size=batch, seed=0, metrics={"accuracy": accuracy}, verbose=0
+    )
     assert np.isclose(h["accuracy"][0], expected)
 
 
@@ -64,7 +75,9 @@ def test_validation_metric_matches_a_manual_computation():
     x, y, _ = data()
     x_val, y_val, labels_val = data(seed=1)
     m = make(lr=1e-15)
-    h = m.fit(x, y, epochs=1, validation_data=(x_val, y_val), metrics={"accuracy": accuracy}, verbose=0)
+    h = m.fit(
+        x, y, epochs=1, validation_data=(x_val, y_val), metrics={"accuracy": accuracy}, verbose=0
+    )
     assert np.isclose(h["val_accuracy"][0], accuracy(m.predict(x_val), labels_val))
     assert np.isclose(h["val_loss"][0], m.evaluate(x_val, y_val))
 
@@ -77,6 +90,8 @@ def test_multiple_custom_metrics():
 
 def test_verbose_output_shows_metrics(capsys):
     x, y, _ = data()
-    make().fit(x, y, epochs=2, validation_data=data(seed=1)[:2], metrics={"accuracy": accuracy}, verbose=1)
+    make().fit(
+        x, y, epochs=2, validation_data=data(seed=1)[:2], metrics={"accuracy": accuracy}, verbose=1
+    )
     out = capsys.readouterr().out
     assert "accuracy:" in out and "val_accuracy:" in out

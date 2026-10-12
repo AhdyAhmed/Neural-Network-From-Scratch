@@ -44,11 +44,16 @@ CONFIG = {
 
 def build_model(config=CONFIG):
     s, seed = config["init_scale"], config["seed"]
-    model = Sequential([
-        Dense(784, 128, seed=seed, init_scale=s), ReLU(),
-        Dense(128, 64, seed=seed + 1, init_scale=s), ReLU(),
-        Dense(64, 10, seed=seed + 2, init_scale=s), Softmax(),
-    ])
+    model = Sequential(
+        [
+            Dense(784, 128, seed=seed, init_scale=s),
+            ReLU(),
+            Dense(128, 64, seed=seed + 1, init_scale=s),
+            ReLU(),
+            Dense(64, 10, seed=seed + 2, init_scale=s),
+            Softmax(),
+        ]
+    )
     model.compile(loss=CategoricalCrossEntropy(), optimizer=SGD(lr=config["learning_rate"]))
     return model
 
@@ -58,10 +63,14 @@ def train(data, config=CONFIG, verbose=1):
     (x_train, y_train), (x_val, y_val), _ = data
     model = build_model(config)
     history = model.fit(
-        x_train, one_hot(y_train, 10),
-        epochs=config["epochs"], batch_size=config["batch_size"], seed=config["seed"],
+        x_train,
+        one_hot(y_train, 10),
+        epochs=config["epochs"],
+        batch_size=config["batch_size"],
+        seed=config["seed"],
         validation_data=(x_val, one_hot(y_val, 10)),
-        metrics={"accuracy": accuracy}, verbose=verbose,
+        metrics={"accuracy": accuracy},
+        verbose=verbose,
     )
     return model, history
 

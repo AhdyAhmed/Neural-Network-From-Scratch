@@ -20,8 +20,7 @@ def _check_shape(grad_output: np.ndarray, shape: tuple, name: str) -> np.ndarray
     grad_output = np.asarray(grad_output, dtype=float)
     if grad_output.shape != shape:
         raise ValueError(
-            f"{name}.backward expected grad_output of shape {shape}, "
-            f"got {grad_output.shape}."
+            f"{name}.backward expected grad_output of shape {shape}, " f"got {grad_output.shape}."
         )
     return grad_output
 
@@ -33,6 +32,7 @@ class ReLU(Layer):
         self._x: np.ndarray | None = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Apply ReLU element-wise and cache the input for backpropagation."""
         x = np.asarray(x, dtype=float)
         self._x = x
         return np.maximum(0.0, x)
@@ -58,6 +58,7 @@ class Sigmoid(Layer):
         self._out: np.ndarray | None = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Apply the numerically stable sigmoid element-wise."""
         x = np.asarray(x, dtype=float)
         out = np.empty_like(x)
         pos = x >= 0
@@ -86,6 +87,7 @@ class Tanh(Layer):
         self._out: np.ndarray | None = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Apply hyperbolic tangent element-wise and cache the output."""
         x = np.asarray(x, dtype=float)
         out = np.tanh(x)
         # Private copy for the same reason as Sigmoid. backward only needs 1 - t^2.
@@ -122,6 +124,7 @@ class Softmax(Layer):
         self._out: np.ndarray | None = None
 
     def forward(self, x: np.ndarray, training: bool = True) -> np.ndarray:
+        """Convert each row of logits into a probability distribution."""
         x = np.asarray(x, dtype=float)
         if x.ndim != 2:
             raise ValueError(f"Softmax expected a 2D input (N, classes), got shape {x.shape}.")
@@ -132,6 +135,7 @@ class Softmax(Layer):
         return out
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        """Return the softmax Jacobian-vector product for each sample."""
         _check_cached(self._out, "Softmax")
         grad_output = _check_shape(grad_output, self._out.shape, "Softmax")
         s = self._out

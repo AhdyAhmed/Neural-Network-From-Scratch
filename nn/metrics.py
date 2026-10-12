@@ -21,7 +21,9 @@ def accuracy(y_pred: np.ndarray, y_true: np.ndarray) -> float:
         predicted = (y_pred.reshape(-1) > 0.5).astype(int)
         actual = y_true.reshape(-1)
     if predicted.shape != actual.shape:
-        raise ValueError(f"Shape mismatch: {np.shape(y_pred)} predictions vs {np.shape(y_true)} targets.")
+        raise ValueError(
+            f"Shape mismatch: {np.shape(y_pred)} predictions vs {np.shape(y_true)} targets."
+        )
     return float(np.mean(predicted == actual))
 
 
@@ -41,7 +43,9 @@ def _class_labels(values: np.ndarray, *, name: str) -> np.ndarray:
     raise ValueError(f"{name} must be a 1D label array or 2D one-hot/probability array.")
 
 
-def confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | None = None) -> np.ndarray:
+def confusion_matrix(
+    y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | None = None
+) -> np.ndarray:
     """Return a ``(K, K)`` confusion matrix; rows are true classes, columns predicted.
 
     Targets can be integer labels or one-hot arrays. Predictions can be integer
@@ -49,12 +53,17 @@ def confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | 
     """
     true_labels = _class_labels(y_true, name="y_true")
     pred_values = np.asarray(y_pred)
-    pred_labels = (pred_values.argmax(axis=1) if pred_values.ndim == 2 and pred_values.shape[1] > 1
-                   else _class_labels(pred_values, name="y_pred"))
+    pred_labels = (
+        pred_values.argmax(axis=1)
+        if pred_values.ndim == 2 and pred_values.shape[1] > 1
+        else _class_labels(pred_values, name="y_pred")
+    )
     if true_labels.size == 0 or pred_labels.size == 0:
         raise ValueError("y_true and y_pred must not be empty.")
     if true_labels.shape != pred_labels.shape:
-        raise ValueError(f"Shape mismatch: {true_labels.shape} true labels vs {pred_labels.shape} predictions.")
+        raise ValueError(
+            f"Shape mismatch: {true_labels.shape} true labels vs {pred_labels.shape} predictions."
+        )
     if np.any(true_labels < 0) or np.any(pred_labels < 0):
         raise ValueError("Class labels must be non-negative.")
     inferred = int(max(true_labels.max(), pred_labels.max())) + 1
@@ -63,12 +72,18 @@ def confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | 
     if not isinstance(num_classes, (int, np.integer)) or num_classes <= 0:
         raise ValueError("num_classes must be a positive integer.")
     if inferred > num_classes:
-        raise ValueError(f"Observed class label requires at least {inferred} classes, got {num_classes}.")
+        raise ValueError(
+            f"Observed class label requires at least {inferred} classes, got {num_classes}."
+        )
     encoded = true_labels * num_classes + pred_labels
-    return np.bincount(encoded, minlength=num_classes * num_classes).reshape(num_classes, num_classes)
+    return np.bincount(encoded, minlength=num_classes * num_classes).reshape(
+        num_classes, num_classes
+    )
 
 
-def per_class_accuracy(y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | None = None) -> np.ndarray:
+def per_class_accuracy(
+    y_true: np.ndarray, y_pred: np.ndarray, num_classes: int | None = None
+) -> np.ndarray:
     """Return recall/accuracy for each true class; absent classes are ``nan``."""
     matrix = confusion_matrix(y_true, y_pred, num_classes=num_classes)
     counts = matrix.sum(axis=1)

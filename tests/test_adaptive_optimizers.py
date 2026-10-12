@@ -107,7 +107,11 @@ def test_adam_step_size_is_bounded_by_roughly_lr():
 def test_adam_and_rmsprop_ignore_the_overall_gradient_scale_but_sgd_does_not():
     rng = np.random.default_rng(1)
     grads = [rng.normal(size=3) for _ in range(40)]
-    for make, invariant in [(lambda: Adam(0.01), True), (lambda: RMSProp(0.01), True), (lambda: SGD(0.01), False)]:
+    for make, invariant in [
+        (lambda: Adam(0.01), True),
+        (lambda: RMSProp(0.01), True),
+        (lambda: SGD(0.01), False),
+    ]:
         w1, w2, o1, o2 = np.ones(3), np.ones(3), make(), make()
         for g in grads:
             o1.step([(w1, g)])
@@ -138,7 +142,9 @@ def test_adaptive_methods_beat_sgd_on_a_badly_scaled_quadratic():
 
 
 # --------------------------------------------------------- shared behaviour
-@pytest.mark.parametrize("make", [lambda: RMSProp(0.01), lambda: Adam(0.01), lambda: Momentum(0.01)])
+@pytest.mark.parametrize(
+    "make", [lambda: RMSProp(0.01), lambda: Adam(0.01), lambda: Momentum(0.01)]
+)
 def test_update_in_place_zero_gradient_and_step_counter(make):
     opt = make()
     w = np.array([1.0, 2.0])
@@ -193,7 +199,9 @@ def test_rmsprop_rejects_invalid_rho(kwargs):
         RMSProp(**kwargs)
 
 
-@pytest.mark.parametrize("kwargs", [{"beta1": 1.0}, {"beta1": -0.1}, {"beta2": 1.0}, {"beta2": -0.5}])
+@pytest.mark.parametrize(
+    "kwargs", [{"beta1": 1.0}, {"beta1": -0.1}, {"beta2": 1.0}, {"beta2": -0.5}]
+)
 def test_adam_rejects_invalid_betas(kwargs):
     with pytest.raises(ValueError):
         Adam(**kwargs)
@@ -205,7 +213,9 @@ def test_repr():
 
 
 # ---------------------------------------------------------------- end to end
-@pytest.mark.parametrize("make", [lambda: RMSProp(0.02), lambda: Adam(0.05)], ids=["RMSProp", "Adam"])
+@pytest.mark.parametrize(
+    "make", [lambda: RMSProp(0.02), lambda: Adam(0.05)], ids=["RMSProp", "Adam"]
+)
 def test_train_a_linear_model(make):
     from nn.layers import Dense
     from nn.losses import MSE
@@ -215,7 +225,9 @@ def test_train_a_linear_model(make):
     m = Sequential([Dense(1, 1, seed=0)])
     m.compile(loss=MSE(), optimizer=make())
     m.fit(x, 2 * x + 1, epochs=300, verbose=0)
-    assert np.isclose(m.layers[0].W[0, 0], 2.0, atol=0.05) and np.isclose(m.layers[0].b[0, 0], 1.0, atol=0.05)
+    assert np.isclose(m.layers[0].W[0, 0], 2.0, atol=0.05) and np.isclose(
+        m.layers[0].b[0, 0], 1.0, atol=0.05
+    )
 
 
 def test_adam_solves_xor():
@@ -226,8 +238,14 @@ def test_adam_solves_xor():
     from nn.model import Sequential
 
     for seed in range(5):
-        m = Sequential([Dense(2, 4, seed=seed, initializer="xavier"), Tanh(),
-                        Dense(4, 1, seed=seed + 100, initializer="xavier"), Sigmoid()])
+        m = Sequential(
+            [
+                Dense(2, 4, seed=seed, initializer="xavier"),
+                Tanh(),
+                Dense(4, 1, seed=seed + 100, initializer="xavier"),
+                Sigmoid(),
+            ]
+        )
         m.compile(loss=BinaryCrossEntropy(), optimizer=Adam(0.05))
         m.fit(X, Y, epochs=500, verbose=0)
         assert accuracy(m) == 1.0

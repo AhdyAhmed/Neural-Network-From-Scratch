@@ -32,7 +32,9 @@ def make(lr=0.1, optimizer=None):
     return m
 
 
-@pytest.mark.parametrize("n, batch, expected", [(64, 16, 4), (10, 3, 4), (10, 10, 1), (10, 100, 1), (7, 1, 7)])
+@pytest.mark.parametrize(
+    "n, batch, expected", [(64, 16, 4), (10, 3, 4), (10, 10, 1), (10, 100, 1), (7, 1, 7)]
+)
 def test_updates_per_epoch(n, batch, expected):
     opt = CountingSGD()
     make(optimizer=opt).fit(*line_data(n), epochs=1, batch_size=batch, verbose=0)
@@ -68,7 +70,9 @@ def test_same_seed_is_reproducible_and_different_seeds_differ():
 
 def test_shuffle_false_ignores_the_seed():
     x, y = line_data()
-    run = lambda s: make().fit(x, y, epochs=5, batch_size=8, shuffle=False, seed=s, verbose=0)["loss"]
+    run = lambda s: make().fit(x, y, epochs=5, batch_size=8, shuffle=False, seed=s, verbose=0)[
+        "loss"
+    ]
     assert run(0) == run(99)
 
 

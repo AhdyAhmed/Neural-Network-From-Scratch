@@ -51,16 +51,26 @@ def main():
     print("\nLosses")
     p = rng.uniform(0.05, 0.95, size=(8, 1))
     y_bin = (rng.random((8, 1)) > 0.5).astype(float)
-    results.append(report("MSE", check_loss(MSE(), rng.normal(size=(8, 1)), rng.normal(size=(8, 1)), tol=TOL)))
-    results.append(report("BinaryCrossEntropy", check_loss(BinaryCrossEntropy(), p, y_bin, tol=TOL)))
+    results.append(
+        report("MSE", check_loss(MSE(), rng.normal(size=(8, 1)), rng.normal(size=(8, 1)), tol=TOL))
+    )
+    results.append(
+        report("BinaryCrossEntropy", check_loss(BinaryCrossEntropy(), p, y_bin, tol=TOL))
+    )
 
     print("\nWhole models")
     for hidden in (ReLU, Tanh, Sigmoid):
         for loss in (MSE, BinaryCrossEntropy):
-            model = Sequential([
-                scaled_dense(4, 6, 1), hidden(), scaled_dense(6, 6, 2), hidden(),
-                scaled_dense(6, 1, 3), Sigmoid(),
-            ])
+            model = Sequential(
+                [
+                    scaled_dense(4, 6, 1),
+                    hidden(),
+                    scaled_dense(6, 6, 2),
+                    hidden(),
+                    scaled_dense(6, 1, 3),
+                    Sigmoid(),
+                ]
+            )
             model.compile(loss=loss(), optimizer=SGD(lr=0.1))
             title = f"Dense-{hidden.__name__}x2 + {loss.__name__}"
             results.append(report(title, check_model(model, x_nz, y_bin, tol=TOL)))

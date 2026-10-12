@@ -35,8 +35,8 @@ def gradients(x, w, b, y):
     dL_da = a - y
     da_dz = a * (1.0 - a)
     dL_dz = dL_da * da_dz
-    dw = dL_dz * x          # dz/dw = x
-    db = dL_dz              # dz/db = 1
+    dw = dL_dz * x  # dz/dw = x
+    db = dL_dz  # dz/db = 1
     return dw, db
 
 
@@ -59,24 +59,24 @@ def main():
     def f(w, b):
         return loss(forward(X, w, b)[1], Y)
 
-    num_dw = np.array([
-        (f(W + eps * np.eye(2)[i], B) - f(W - eps * np.eye(2)[i], B)) / (2 * eps)
-        for i in range(2)
-    ])
+    num_dw = np.array(
+        [
+            (f(W + eps * np.eye(2)[i], B) - f(W - eps * np.eye(2)[i], B)) / (2 * eps)
+            for i in range(2)
+        ]
+    )
     num_db = (f(W, B + eps) - f(W, B - eps)) / (2 * eps)
 
     print("\n=== Backward pass (numerical) ===")
     print(f"dL/dw = {num_dw}")
     print(f"dL/db = {num_db:.6f}")
 
-    print("\nMax abs difference:",
-          max(np.abs(dw - num_dw).max(), abs(db - num_db)))
+    print("\nMax abs difference:", max(np.abs(dw - num_dw).max(), abs(db - num_db)))
 
     # One gradient-descent step: the loss should go down
     lr = 0.5
     w_new, b_new = W - lr * dw, B - lr * db
-    print(f"\nAfter one SGD step (lr={lr}): L = {f(w_new, b_new):.6f} "
-          f"(was {loss(a, Y):.6f})")
+    print(f"\nAfter one SGD step (lr={lr}): L = {f(w_new, b_new):.6f} " f"(was {loss(a, Y):.6f})")
 
 
 if __name__ == "__main__":

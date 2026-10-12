@@ -21,10 +21,10 @@ from nn.utils import iterate_minibatches
 class Sequential:
     """A stack of layers applied in order (forward) and in reverse (backward).
 
-        model = Sequential([Dense(1, 8), Tanh(), Dense(8, 1)])
-        model.compile(loss=MSE(), optimizer=SGD(lr=0.1))
-        history = model.fit(X, y, epochs=300)
-        preds = model.predict(X)
+    model = Sequential([Dense(1, 8), Tanh(), Dense(8, 1)])
+    model.compile(loss=MSE(), optimizer=SGD(lr=0.1))
+    history = model.fit(X, y, epochs=300)
+    preds = model.predict(X)
     """
 
     def __init__(self, layers: list[Layer]) -> None:
@@ -50,8 +50,11 @@ class Sequential:
         self.l2 = float(l2)
 
     def _regularization_penalty(self) -> float:
-        return 0.5 * self.l2 * sum(float(np.sum(layer.W ** 2))
-                                  for layer in self.layers if isinstance(layer, Dense))
+        return (
+            0.5
+            * self.l2
+            * sum(float(np.sum(layer.W**2)) for layer in self.layers if isinstance(layer, Dense))
+        )
 
     def _add_regularization_gradients(self) -> None:
         if self.l2:
@@ -60,9 +63,11 @@ class Sequential:
                     layer.dW += self.l2 * layer.W
 
     def params(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        """Return all trainable parameters and gradients in layer order."""
         return [p for layer in self.layers for p in layer.params()]
 
     def summary(self) -> str:
+        """Return a fixed-width layer and parameter-count summary."""
         lines = ["Layer                      Params", "-" * 34]
         total = 0
         for layer in self.layers:
@@ -73,16 +78,21 @@ class Sequential:
         return "\n".join(lines)
 
     # ---------------------------------------------------------- passes
-    def forward(self, x: np.ndarray, training: bool = True, record: list | None = None) -> np.ndarray:
+    def forward(
+        self, x: np.ndarray, training: bool = True, record: list | None = None
+    ) -> np.ndarray:
         """Run the layers in order. If ``record`` is a list, every layer's output is appended to it
-        (used by ``nn.diagnostics``; the arrays are the live outputs, so copy them if you keep them)."""
+        (used by ``nn.diagnostics``; the arrays are the live outputs, so copy them if you keep them).
+        """
         for layer in self.layers:
             x = layer.forward(x, training=training)
             if record is not None:
                 record.append(x)
         return x
 
-    def backward(self, grad: np.ndarray, skip_last: bool = False, record: list | None = None) -> np.ndarray:
+    def backward(
+        self, grad: np.ndarray, skip_last: bool = False, record: list | None = None
+    ) -> np.ndarray:
         """Chain rule through the layers in reverse.
 
         ``skip_last=True`` starts at the second-to-last layer (used by the fused
@@ -114,7 +124,9 @@ class Sequential:
         return self.backward(self.loss.backward(), record=record)
 
     def _is_fused(self) -> bool:
-        return isinstance(self.layers[-1], Softmax) and isinstance(self.loss, CategoricalCrossEntropy)
+        return isinstance(self.layers[-1], Softmax) and isinstance(
+            self.loss, CategoricalCrossEntropy
+        )
 
     # ------------------------------------------------------- training
     def train_step(self, x: np.ndarray, y: np.ndarray) -> float:
@@ -171,7 +183,9 @@ class Sequential:
         x, y = self._check_data(x, y)
         if epochs <= 0:
             raise ValueError("epochs must be positive.")
-        if batch_size is not None and (not isinstance(batch_size, (int, np.integer)) or batch_size <= 0):
+        if batch_size is not None and (
+            not isinstance(batch_size, (int, np.integer)) or batch_size <= 0
+        ):
             raise ValueError("batch_size must be a positive integer or None.")
         if not isinstance(early_stopping, (bool, np.bool_)):
             raise ValueError("early_stopping must be a boolean.")
@@ -248,7 +262,9 @@ class Sequential:
                 print(f"{msg}  ({time.perf_counter() - start:.2f}s)")
             if early_stopping and epochs_without_improvement >= patience:
                 if verbose:
-                    print(f"Early stopping at epoch {epoch}; best validation loss {best_val_loss:.6f} at epoch {best_epoch}.")
+                    print(
+                        f"Early stopping at epoch {epoch}; best validation loss {best_val_loss:.6f} at epoch {best_epoch}."
+                    )
                 break
         if early_stopping and restore_best_weights and best_params is not None:
             for (parameter, _), (best_value, _) in zip(self.params(), best_params):
@@ -269,7 +285,9 @@ class Sequential:
     # --------------------------------------------------------- helpers
     def _require_compiled(self) -> None:
         if self.loss is None or self.optimizer is None:
-            raise RuntimeError("Call compile(loss=..., optimizer=...) before training or evaluating.")
+            raise RuntimeError(
+                "Call compile(loss=..., optimizer=...) before training or evaluating."
+            )
 
     @staticmethod
     def _check_data(x, y) -> tuple[np.ndarray, np.ndarray]:
@@ -286,7 +304,9 @@ class Sequential:
         if x.shape[1] == 0 or y.shape[1] == 0:
             raise ValueError("x and y must each contain at least one feature/output column.")
         if x.shape[0] != y.shape[0]:
-            raise ValueError(f"x and y must have the same number of samples, got {x.shape[0]} and {y.shape[0]}.")
+            raise ValueError(
+                f"x and y must have the same number of samples, got {x.shape[0]} and {y.shape[0]}."
+            )
         return x, y
 
     def __repr__(self) -> str:

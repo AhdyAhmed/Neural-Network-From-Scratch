@@ -5,6 +5,7 @@ Run from the repository root:
 
 The script saves a learning-curve plot and a JSON summary under results/ and assets/.
 """
+
 from __future__ import annotations
 
 import json
@@ -51,25 +52,40 @@ def main() -> None:
     y_val = np.sin(x_val) + rng.normal(0, 0.20, x_val.shape)
 
     histories = {}
-    summary = {"seed": 2026, "epochs": 250, "train_samples": len(x_train), "validation_samples": len(x_val), "models": {}}
+    summary = {
+        "seed": 2026,
+        "epochs": 250,
+        "train_samples": len(x_train),
+        "validation_samples": len(x_val),
+        "models": {},
+    }
     for kind in ("none", "l2", "dropout"):
         model = make_model(kind, seed=10)
         start = time.perf_counter()
         history = model.fit(
-            x_train, y_train, epochs=250, batch_size=16, shuffle=True, seed=21,
-            validation_data=(x_val, y_val), verbose=0,
+            x_train,
+            y_train,
+            epochs=250,
+            batch_size=16,
+            shuffle=True,
+            seed=21,
+            validation_data=(x_val, y_val),
+            verbose=0,
         )
         histories[kind] = history
         train_mse = float(np.mean((model.predict(x_train) - y_train) ** 2))
         val_mse = float(np.mean((model.predict(x_val) - y_val) ** 2))
         summary["models"][kind] = {
-            "train_mse": float(train_mse), "validation_mse": float(val_mse),
+            "train_mse": float(train_mse),
+            "validation_mse": float(val_mse),
             "validation_minus_train_mse": float(val_mse - train_mse),
             "seconds": round(time.perf_counter() - start, 3),
             "l2": 1e-3 if kind == "l2" else 0.0,
             "dropout_rate": 0.15 if kind == "dropout" else 0.0,
         }
-        print(f"{kind:>7}: train MSE={train_mse:.4f}, validation MSE={val_mse:.4f}, gap={val_mse-train_mse:+.4f}")
+        print(
+            f"{kind:>7}: train MSE={train_mse:.4f}, validation MSE={val_mse:.4f}, gap={val_mse-train_mse:+.4f}"
+        )
 
     ASSETS.mkdir(exist_ok=True)
     RESULTS.mkdir(exist_ok=True)
@@ -86,7 +102,9 @@ def main() -> None:
     fig.tight_layout()
     fig.savefig(ASSETS / "day11_regularization.png", dpi=160)
     plt.close(fig)
-    (RESULTS / "day11_regularization.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    (RESULTS / "day11_regularization.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8"
+    )
     print(f"Saved {ASSETS / 'day11_regularization.png'}")
     print(f"Saved {RESULTS / 'day11_regularization.json'}")
 
